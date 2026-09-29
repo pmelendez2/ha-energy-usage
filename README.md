@@ -59,4 +59,6 @@ Windows and macOS are not currently supported or tested.
 
 ## License
 
-A public open-source license has not yet been selected.
+This project is licensed under the MIT License.
+
+See `LICENSE` for the complete license text.
