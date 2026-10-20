@@ -69,3 +69,16 @@ Energy delivered from a customer or DER to an electric grid.
 ## Net
 
 A measurement representing the difference between energy import and export.
+
+## Usage date range
+
+The start and end dates or times selected when viewing or retrieving
+consumption history. The start is included and the end is excluded.
+The interface shows dates in the Home Assistant configured local time zone.
+Internal requests use UTC timestamps; customers do not enter UTC offsets.
+
+Backend code may call a UTC request segment a `window`, but user-facing
+text should always say **usage date range**. A date range is not inherently
+measured in days: it may cover hours, days, or longer history. The current
+backend limits each individual request to 31 days, and the integration
+combines multiple requests for longer date ranges.
