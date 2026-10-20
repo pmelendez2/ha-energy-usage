@@ -92,7 +92,7 @@ class EnergyUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             url = user_input[CONF_URL].rstrip("/")
-            token = entry.data[CONF_TOKEN]
+            token = user_input[CONF_TOKEN]
 
             try:
                 await self._validate(url, token)
@@ -107,7 +107,7 @@ class EnergyUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._abort_if_unique_id_mismatch()
                 return self.async_update_reload_and_abort(
                     entry,
-                    data_updates={CONF_URL: url},
+                    data_updates={CONF_URL: url, CONF_TOKEN: token},
                 )
 
         return self.async_show_form(
@@ -118,6 +118,7 @@ class EnergyUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_URL,
                         default=entry.data[CONF_URL],
                     ): str,
+                    vol.Required(CONF_TOKEN): str,
                 }
             ),
             errors=errors,

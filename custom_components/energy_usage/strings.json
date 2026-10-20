@@ -17,10 +17,11 @@
         }
       },
       "reconfigure": {
-        "title": "Change Energy Ingest server",
-        "description": "Enter the new API address. This must be the same Energy Ingest instance; moving to a different server requires a separate integration setup.",
+        "title": "Update Energy Ingest connection",
+        "description": "Enter the server URL and a valid API token. Use this form after reinstalling Energy Ingest or rotating the API token. Changing to a different server is not supported.",
         "data": {
-          "url": "Energy Ingest API URL"
+          "url": "Energy Ingest API URL",
+          "api_token": "New API token"
         }
       }
     },
