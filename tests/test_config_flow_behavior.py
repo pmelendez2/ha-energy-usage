@@ -158,15 +158,51 @@ class ConfigFlowTests(unittest.IsolatedAsyncioTestCase):
     async def test_reconfigure_same_server(self):
         result = await self.flow.async_step_reconfigure({
             "url": "http://example.test:8080/",
+            "api_token": "replacement-token",
         })
         self.assertEqual(result["type"], "update")
-        self.assertEqual(result["data_updates"],
-                         {"url": "http://example.test:8080"})
+        self.assertEqual(result["data_updates"], {
+            "url": "http://example.test:8080",
+            "api_token": "replacement-token",
+        })
+        self.flow._validate.assert_awaited_once_with(
+            "http://example.test:8080", "replacement-token"
+        )
+
+    async def test_reconfigure_rejects_invalid_replacement(self):
+        self.flow._validate.side_effect = self.api.EnergyAuthError()
+        result = await self.flow.async_step_reconfigure({
+            "url": "http://example.test:8080",
+            "api_token": "new-token",
+        })
+        self.assertEqual(result["errors"]["base"], "invalid_auth")
+        self.flow._validate.assert_awaited_once_with(
+            "http://example.test:8080", "new-token"
+        )
+
+    async def test_reconfigure_recovers_from_revoked_token(self):
+        self.flow._validate.reset_mock()
+
+        result = await self.flow.async_step_reconfigure({
+            "url": "http://example.test:8080",
+            "api_token": "valid-new-token",
+        })
+
+        self.assertEqual(result["type"], "update")
+        self.assertEqual(
+            result["data_updates"]["api_token"],
+            "valid-new-token",
+        )
+        self.flow._validate.assert_awaited_once_with(
+            "http://example.test:8080",
+            "valid-new-token",
+        )
 
     async def test_reconfigure_rejects_different_identity(self):
         with self.assertRaisesRegex(RuntimeError, "identity mismatch"):
             await self.flow.async_step_reconfigure({
                 "url": "http://192.0.2.10:8080",
+                "api_token": "replacement-token",
             })
 
     async def test_empty_input_shows_forms(self):
