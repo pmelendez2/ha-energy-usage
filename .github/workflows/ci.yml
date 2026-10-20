@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+      - name: Install test dependencies
+        run: python -m pip install aiohttp
       - name: Compile source and tests
         run: python -m compileall -q custom_components/energy_usage tests
       - name: Run regression tests
