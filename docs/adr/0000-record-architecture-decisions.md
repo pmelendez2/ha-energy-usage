@@ -1,4 +1,11 @@
+<!-- SPDX-License-Identifier: MIT -->
 # 0000. Record architecture decisions
+
+> **Audience:** Maintainers and contributors
+> **Purpose:** 0000. Record architecture decisions reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
 
 * Status: Accepted
 * Date: 2026-09-29

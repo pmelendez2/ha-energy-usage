@@ -20,6 +20,11 @@ jobs:
           python-version: '3.13'
       - name: Install test dependencies
         run: python -m pip install aiohttp
+      - name: Validate Explorer JavaScript
+        run: |
+          node --check \
+            custom_components/energy_usage/www/energy-usage-explorer.js
+          node tests/test-energy-usage-explorer.cjs
       - name: Compile source and tests
         run: python -m compileall -q custom_components/energy_usage tests
       - name: Run regression tests
@@ -30,5 +35,7 @@ jobs:
         run: |
           python scripts/package_release.py --output /tmp/ha-energy-package.zip
           python scripts/check_release_package.py /tmp/ha-energy-package.zip
+      - name: Validate documentation
+        run: python scripts/check_documentation.py
       - name: Check whitespace
         run: git diff --check HEAD

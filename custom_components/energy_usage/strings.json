@@ -34,5 +34,29 @@
       "reconfigure_successful": "Energy Ingest connection updated.",
       "reauth_successful": "Energy Ingest API token updated."
     }
+  },
+  "services": {
+    "import_historical_usage": {
+      "name": "Import historical usage",
+      "description": "Import validated electricity or natural gas usage history into Home Assistant Recorder. This action is intended for initial imports and will not overwrite existing statistics.",
+      "fields": {
+        "meter_id": {
+          "name": "Meter ID",
+          "description": "The Energy Ingest meter ID to import."
+        },
+        "start_date": {
+          "name": "Start date",
+          "description": "First local calendar date to import, inclusive."
+        },
+        "end_date": {
+          "name": "End date",
+          "description": "Last local calendar date to import, inclusive. The range may contain up to 441 calendar days."
+        },
+        "confirm_initial_import": {
+          "name": "Confirm initial import",
+          "description": "Must be enabled. Import is refused when the destination statistics series already contains history."
+        }
+      }
+    }
   }
 }

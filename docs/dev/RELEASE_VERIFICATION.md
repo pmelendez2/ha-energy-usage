@@ -1,6 +1,12 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Home Assistant Integration Release Verification
 
+> **Audience:** Developers and maintainers
+> **Purpose:** Home Assistant Integration Release Verification reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
+
 **Purpose:** Define repeatable test, package, and release verification.
 
 **Intended Audience:** Energy Usage developers and maintainers.
@@ -11,10 +17,14 @@ Run from the `ha_energy_usage` repository root:
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
+python3 -m pytest -q
 python3 -m compileall -q custom_components/energy_usage tests
 python3 scripts/check_integration.py
 python3 scripts/package_release.py --output /tmp/ha-energy-usage.zip
 python3 scripts/check_release_package.py /tmp/ha-energy-usage.zip
+node --check custom_components/energy_usage/www/energy-usage-explorer.js
+node tests/test-energy-usage-explorer.cjs
+python3 scripts/check_documentation.py
 git diff --check
 ```
 
@@ -27,8 +37,8 @@ Home Assistant runtime integration test.
 Test with a disposable Home Assistant instance, using the published
 Energy Ingest HTTP API and a development-only bearer token. Confirm
 successful setup, two meter devices, sensor state, failure/recovery,
-and reload/unload. Recorder historical write synchronization remains
-outside the claimed working feature set until runtime verification.
+and reload/unload. Explicit initial Recorder imports have been runtime-validated. Automatic
+correction-safe synchronization remains outside version 0.1.0.
 
 ## Publishing
 

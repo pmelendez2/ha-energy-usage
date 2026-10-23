@@ -42,7 +42,9 @@ class EnergyApi:
                 if response.status in (401, 403):
                     raise EnergyAuthError("Authentication failed")
                 if response.status != 200:
-                    raise EnergyApiError("Energy Ingest API request failed")
+                    raise EnergyApiError(
+                        f"Energy Ingest API returned HTTP {response.status}"
+                    )
                 return await response.json(content_type=None)
         except EnergyApiError:
             raise

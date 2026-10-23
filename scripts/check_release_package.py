@@ -12,6 +12,12 @@ PREFIX = "custom_components/energy_usage/"
 REQUIRED = {
     PREFIX + "manifest.json",
     PREFIX + "__init__.py",
+    PREFIX + "services.yaml",
+    PREFIX + "history_import_service.py",
+    PREFIX + "statistics_import.py",
+    PREFIX + "www/energy-usage-explorer.js",
+    PREFIX + "strings.json",
+    PREFIX + "translations/en.json",
     PREFIX + "brand/icon.png",
     PREFIX + "brand/icon@2x.png",
 }

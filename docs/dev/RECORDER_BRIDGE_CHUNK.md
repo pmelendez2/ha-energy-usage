@@ -2,6 +2,12 @@
 
 # ADR-0001 Recorder adapter: guarded initial import
 
+> **Audience:** Developers and maintainers
+> **Purpose:** ADR-0001 Recorder adapter: guarded initial import reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
+
 Status: development-only; NOT activated during Home Assistant setup.
 
 ## Scope

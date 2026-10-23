@@ -5,6 +5,7 @@
 
 from datetime import timedelta
 import logging
+from pathlib import Path
 
 from homeassistant.const import CONF_URL, Platform
 from homeassistant.exceptions import ConfigEntryAuthFailed
@@ -12,12 +13,40 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator, UpdateFailed,
 )
+from homeassistant.components.http import StaticPathConfig
+from homeassistant.helpers import config_validation as cv
 
 from .api import EnergyApi, EnergyApiError, EnergyAuthError
 from .const import CONF_TOKEN, DOMAIN
 
 PLATFORMS = [Platform.SENSOR]
 
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
+EXPLORER_URL = "/energy_usage/energy-usage-explorer.js"
+
+async def async_register_explorer(hass):
+    """Register the bundled Energy Usage Explorer resource."""
+    explorer_path = (
+        Path(__file__).resolve().parent
+        / "www"
+        / "energy-usage-explorer.js"
+    )
+
+    await hass.http.async_register_static_paths(
+        [
+            StaticPathConfig(
+                EXPLORER_URL,
+                str(explorer_path),
+                cache_headers=False,
+            )
+        ]
+    )
+
+async def async_setup(hass, config):
+    """Set up integration-wide Energy Usage resources."""
+    await async_register_explorer(hass)
+    return True
 
 async def async_setup_entry(hass, entry):
     """Set up read-only physical-meter discovery."""
@@ -51,6 +80,10 @@ async def async_setup_entry(hass, entry):
     except Exception:
         hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
         raise
+    if hasattr(hass, "services"):
+        from .history_import_service import async_register_history_service
+
+        await async_register_history_service(hass, entry)
     return True
 
 
@@ -59,6 +92,11 @@ async def async_unload_entry(hass, entry):
     unloaded = await hass.config_entries.async_unload_platforms(
         entry, PLATFORMS
     )
+
     if unloaded:
         hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
+        if not hass.data.get(DOMAIN) and hasattr(hass, "services"):
+            from .history_import_service import SERVICE
+
+            hass.services.async_remove(DOMAIN, SERVICE)
     return unloaded

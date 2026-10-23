@@ -1,4 +1,14 @@
+<!-- SPDX-License-Identifier: MIT -->
 # Test Plan
+
+> **Audience:** Maintainers and contributors
+> **Purpose:** Test Plan reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
+
+The recorded verification matrix and its evidence are maintained in
+[Tested Environments](TESTED_ENVIRONMENTS.md).
 
 ## Development baseline
 
@@ -18,7 +28,9 @@ For each Home Assistant release considered for support:
 5. Verify gas statistics.
 6. Verify Energy Dashboard behavior.
 7. Record known compatibility issues.
-8. Update the supported/tested versions in `README.md`.
+8. Add the verified environment and its evidence to
+   [Tested Environments](TESTED_ENVIRONMENTS.md).
+9. Update any user-facing compatibility summary only after recording evidence.
 
 ## Exit criteria
 

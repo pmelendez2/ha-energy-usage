@@ -2,6 +2,12 @@
 
 # Automatic Home Assistant API token provisioning
 
+> **Audience:** Developers and maintainers
+> **Purpose:** Automatic Home Assistant API token provisioning reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
+
 **Status:** Backend implementation pending source verification.
 
 **Repository:** `energy_ingest` (not `ha_energy_usage`).

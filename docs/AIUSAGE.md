@@ -1,4 +1,11 @@
+<!-- SPDX-License-Identifier: MIT -->
 # AI Usage
+
+> **Audience:** Developers and maintainers
+> **Purpose:** AI Usage reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
 
 ## Purpose
 
@@ -22,13 +29,13 @@ AI assisted in their discussion or drafting.
 
 | Release | AI Tool | Model | Date Range |
 |---|---|---|---|
-| Unreleased / 0.1.0-dev | ChatGPT | GPT-5.6 Sol | 2026-09-28 - present |
+| 0.1.0 (pre-release) | ChatGPT | GPT-5.6 Sol, GPT-6 | 2026-09-28 - 2026-10-23 |
 
-### Unreleased / 0.1.0-dev
+### 0.1.0 (pre-release)
 
 * AI Tool: ChatGPT
-* Model: GPT-5.6 Sol
-* Date Range: 2026-09-28 - present
+* Models: GPT-5.6 Sol, GPT-6
+* Date Range: 2026-09-28 - 2026-10-23
 * Maintainer Review: Required
 
 #### Areas of AI assistance
@@ -44,7 +51,9 @@ AI assistance has been used for:
 - repository structure;
 - test strategy and CI/CD planning;
 - documentation planning;
-- future Home Assistant integration planning.
+- integration source development and Recorder import tests;
+- Explorer UI, tests, HACS registration and packaging;
+- installation and release-documentation review.
 
 #### Verification
 

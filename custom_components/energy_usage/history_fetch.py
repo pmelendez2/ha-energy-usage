@@ -46,8 +46,28 @@ async def fetch_usage_history(
         for item in normalized:
             if not cursor <= item.start_utc < next_end:
                 raise EnergyApiError("Observation lies outside its window")
-            if result and item.start_utc < result[-1].end_utc:
-                raise EnergyApiError("Windows contain overlapping readings")
+            if result:
+                previous = result[-1]
+                overlap = previous.end_utc - item.start_utc
+
+                if item.start_utc <= previous.start_utc:
+                    raise EnergyApiError(
+                        "Windows contain duplicate or overlapping readings"
+                    )
+                if overlap > timedelta(0):
+                    dst_overlap = (
+                        commodity == 7
+                        and overlap == timedelta(hours=1)
+                    )
+                    if not dst_overlap:
+                        raise EnergyApiError(
+                            "Windows contain overlapping readings: "
+                            f"commodity={commodity}, "
+                            f"previous_start={previous.start_utc.isoformat()}, "
+                            f"previous_end={previous.end_utc.isoformat()}, "
+                            f"current_start={item.start_utc.isoformat()}, "
+                            f"overlap={overlap}"
+                        )
             result.append(item)
         cursor = next_end
     return result

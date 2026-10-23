@@ -2,6 +2,12 @@
 
 # ADR-0001 implementation chunk: electricity statistics preview
 
+> **Audience:** Developers and maintainers
+> **Purpose:** ADR-0001 implementation chunk: electricity statistics preview reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
+
 Status: development-only, no Recorder write operations.
 
 This chunk updates `statistics_plan.py` to accept actual subhourly
