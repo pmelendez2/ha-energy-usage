@@ -6,7 +6,7 @@
   "issue_tracker": "https://github.com/pmelendez2/ha_energy_usage/issues",
   "codeowners": [],
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": ["http", "recorder"],
   "requirements": [],
   "iot_class": "local_polling"
 }
