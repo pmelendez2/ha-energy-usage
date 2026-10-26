@@ -48,6 +48,17 @@ class LifecycleTests(unittest.IsolatedAsyncioTestCase):
         cls.saved = dict(sys.modules)
         ha = types.ModuleType("homeassistant")
         ha.__path__ = []
+        components = types.ModuleType("homeassistant.components")
+        components.__path__ = []
+
+        http = types.ModuleType("homeassistant.components.http")
+        http.StaticPathConfig = Mock()
+        validation = types.ModuleType(
+            "homeassistant.helpers.config_validation"
+        )
+        validation.config_entry_only_config_schema = Mock(
+            return_value=Mock()
+        )
         const = types.ModuleType("homeassistant.const")
         const.CONF_URL = "url"
         const.Platform = types.SimpleNamespace(SENSOR="sensor")
@@ -64,11 +75,14 @@ class LifecycleTests(unittest.IsolatedAsyncioTestCase):
         coordinator.UpdateFailed = type("UpdateFailed", (Exception,), {})
         for name, module in {
             "homeassistant": ha,
+            "homeassistant.components": components,
+            "homeassistant.components.http": http,
             "homeassistant.const": const,
             "homeassistant.exceptions": exceptions,
             "homeassistant.helpers": types.ModuleType(
                 "homeassistant.helpers"
             ),
+            "homeassistant.helpers.config_validation": validation,
             "homeassistant.helpers.aiohttp_client": client,
             "homeassistant.helpers.update_coordinator": coordinator,
         }.items():

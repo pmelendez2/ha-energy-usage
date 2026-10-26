@@ -2,6 +2,12 @@
 
 # Recorder read-back audit chunk
 
+> **Audience:** Developers and maintainers
+> **Purpose:** Recorder read-back audit chunk reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
+
 This chunk adds `recorder_audit.py`, a **read-only** comparison of a
 planned electricity statistics series with values read back from Recorder.
 It reports missing, unexpected, or numerically mismatched hourly rows.

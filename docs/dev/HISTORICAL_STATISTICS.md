@@ -1,6 +1,13 @@
+<!-- SPDX-License-Identifier: MIT -->
 <!-- AI-assisted: ChatGPT / GPT-6; 2026-10-16. -->
 
 # Historical Statistics Development
+
+> **Audience:** Developers and maintainers
+> **Purpose:** Historical Statistics Development reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
 
 ## Scope
 

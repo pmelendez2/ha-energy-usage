@@ -111,7 +111,9 @@ def normalize_stream(
 
     result.sort(key=lambda item: item.start_utc)
     for previous, current in zip(result, result[1:]):
-        if current.start_utc < previous.end_utc:
-            raise HistoryValidationError("Overlapping resolved intervals")
+        if commodity == 1 and current.start_utc < previous.end_utc:
+            raise HistoryValidationError(
+                "Overlapping resolved intervals"
+            )
 
     return result

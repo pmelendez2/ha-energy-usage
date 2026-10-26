@@ -1,6 +1,13 @@
+<!-- SPDX-License-Identifier: MIT -->
 <!-- AI-assisted: ChatGPT / GPT-6; 2026-10-16. -->
 
 # Home Assistant Development Runtime
+
+> **Audience:** Developers and maintainers
+> **Purpose:** Home Assistant Development Runtime reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
 
 ## Purpose
 

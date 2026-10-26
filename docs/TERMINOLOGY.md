@@ -1,4 +1,11 @@
+<!-- SPDX-License-Identifier: MIT -->
 # Terminology
+
+> **Audience:** Maintainers and contributors
+> **Purpose:** Terminology reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
 
 ## CCA
 

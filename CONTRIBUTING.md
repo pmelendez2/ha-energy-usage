@@ -1,4 +1,11 @@
+<!-- SPDX-License-Identifier: MIT -->
 # Contributing
+
+> **Audience:** Developers and maintainers
+> **Purpose:** Contributing reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
 
 Contributions should follow current Home Assistant integration development
 practices and include tests for behavioral changes.

@@ -33,14 +33,16 @@ allowed_roots = {
     "custom_components", "tests", "docs", "scripts", ".github",
 }
 allowed_top = {
-    "README.md", "LICENSE", "CHANGELOG.md", "CONTRIBUTING.md",
+    "README.md", "INSTALLATION.md", "LICENSE",
+    "CHANGELOG.md", "CONTRIBUTING.md",
     "CODE_OF_CONDUCT.md", "SECURITY.md", "pyproject.toml",
     "pytest.ini", "requirements.txt", "requirements_test.txt",
     "requirements_dev.txt", "hacs.json", ".gitignore",
     ".pre-commit-config.yaml", "ruff.toml", "mypy.ini",
 }
 allowed_suffixes = {
-    ".py", ".md", ".json", ".toml", ".yaml", ".yml",
+    ".py", ".js", ".cjs", ".mjs",
+    ".md", ".json", ".toml", ".yaml", ".yml",
     ".sh", ".txt", ".ini", ".cfg", ".po", ".pot",
 }
 blocked_parts = {
@@ -61,9 +63,21 @@ def included(path: Path) -> bool:
     if any(p.startswith(".env") or p.endswith((".key", ".pem", ".p12", ".pfx"))
            for p in parts):
         return False
-    if path.name in blocked_names or path.suffix.lower() not in allowed_suffixes:
+    if (
+        len(parts) == 4
+        and parts[:3] == (
+            "custom_components", "energy_usage", "brand"
+        )
+        and path.name in {"icon.png", "icon@2x.png"}
+    ):
+        return True
+    if path.name in blocked_names:
         return False
-    return parts[0] in allowed_roots or str(path) in allowed_top
+    if str(path) in allowed_top:
+        return True
+    if path.suffix.lower() not in allowed_suffixes:
+        return False
+    return parts[0] in allowed_roots
 
 raw = subprocess.check_output(
     ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],

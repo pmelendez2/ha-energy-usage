@@ -3,6 +3,12 @@
 
 # API Token Reconfiguration
 
+> **Audience:** Developers and maintainers
+> **Purpose:** API Token Reconfiguration reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
+
 **Purpose:** Describe the user-facing API token rotation workflow and
 its authentication safety requirements.
 

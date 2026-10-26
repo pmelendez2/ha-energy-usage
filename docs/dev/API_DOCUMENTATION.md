@@ -2,6 +2,12 @@
 
 # API documentation ownership
 
+> **Audience:** Developers and maintainers
+> **Purpose:** API documentation ownership reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
+
 The Rust `energy_ingest` service is the source of truth for its HTTP API.
 Generate an OpenAPI 3 specification from the Rust route and schema definitions
 (or a schema whose drift is checked by API contract tests). Publish an

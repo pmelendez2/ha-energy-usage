@@ -1,4 +1,11 @@
+<!-- SPDX-License-Identifier: MIT -->
 # HA-TC-0001: Energy Dashboard displays imported usage
+
+> **Audience:** Maintainers and contributors
+> **Purpose:** HA-TC-0001: Energy Dashboard displays imported usage reference for Energy Usage.
+> **Status:** Current documentation baseline
+> **Release:** 0.1.0
+> **Last Updated:** 2026-10-23
 
 ## Objective
 
