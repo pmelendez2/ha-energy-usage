@@ -25,9 +25,13 @@ for path in files:
     if not source.startswith('<!-- SPDX-License-Identifier: MIT -->'):
         errors.append(f'{relative}: missing SPDX header')
     for field in REQUIRED:
-        if f'> **{field}:**' not in source:
+        pattern = rf'^\*\*{re.escape(field)}:\*\*\s+\S[^\n]*$'
+        if not re.search(pattern, source, re.M):
             errors.append(f'{relative}: missing {field} metadata')
-    if f'> **Release:** {VERSION}' not in source:
+    if not re.search(
+        rf'^\*\*Release:\*\* {re.escape(VERSION)}$',
+        source, re.M
+    ):
         errors.append(f'{relative}: release mismatch; expected {VERSION}')
     if not re.search(r'^# ', source, re.M):
         errors.append(f'{relative}: missing level-one title')

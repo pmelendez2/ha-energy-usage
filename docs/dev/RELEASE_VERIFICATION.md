@@ -1,11 +1,15 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Home Assistant Integration Release Verification
 
-> **Audience:** Developers and maintainers
-> **Purpose:** Home Assistant Integration Release Verification reference for Energy Usage.
-> **Status:** Current documentation baseline
-> **Release:** 0.1.0
-> **Last Updated:** 2026-10-23
+**Audience:** Developers and maintainers
+
+**Purpose:** Home Assistant Integration Release Verification reference for Energy Usage.
+
+**Status:** Current documentation baseline
+
+**Release:** 0.1.1
+
+**Last Updated:** 2026-10-23
 
 **Purpose:** Define repeatable test, package, and release verification.
 

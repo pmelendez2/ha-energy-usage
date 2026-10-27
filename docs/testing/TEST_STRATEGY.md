@@ -1,11 +1,15 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Test Strategy
 
-> **Audience:** Maintainers and contributors
-> **Purpose:** Test Strategy reference for Energy Usage.
-> **Status:** Current documentation baseline
-> **Release:** 0.1.0
-> **Last Updated:** 2026-10-23
+**Audience:** Maintainers and contributors
+
+**Purpose:** Test Strategy reference for Energy Usage.
+
+**Status:** Current documentation baseline
+
+**Release:** 0.1.1
+
+**Last Updated:** 2026-10-23
 
 The Home Assistant integration will use repeatable automated and manual tests.
 

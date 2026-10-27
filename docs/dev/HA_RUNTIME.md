@@ -3,11 +3,15 @@
 
 # Home Assistant Development Runtime
 
-> **Audience:** Developers and maintainers
-> **Purpose:** Home Assistant Development Runtime reference for Energy Usage.
-> **Status:** Current documentation baseline
-> **Release:** 0.1.0
-> **Last Updated:** 2026-10-23
+**Audience:** Developers and maintainers
+
+**Purpose:** Home Assistant Development Runtime reference for Energy Usage.
+
+**Status:** Current documentation baseline
+
+**Release:** 0.1.1
+
+**Last Updated:** 2026-10-23
 
 ## Purpose
 
@@ -43,12 +47,15 @@ commit it. Container loopback addresses are container-specific.
 - Network failure and recovery work without restarting MariaDB.
 
 The Python unit tests use substitutes; passing them does not satisfy
-these runtime checks. Recorder imports are not yet implemented.
+these runtime checks. Guarded first-time Recorder import is implemented;
+incremental synchronization and revision-aware correction are not.
 
 ## Initial backend connectivity verified (2026-10-19)
 
 Development Home Assistant Core 2026.10.1 connected to Energy Ingest
 v0.1.4 at a LAN HTTP API, authenticated with a dedicated bearer token.
 Two devices and two entities were discovered (Electric and Gas).
-Historical statistics synchronization has not yet been verified.
+The initial connectivity check did not verify historical statistics.
+Subsequent runtime evidence is recorded in
+[Tested Environments](../testing/TESTED_ENVIRONMENTS.md).
 Avoid recording bearer tokens, URLs containing credentials or private XML.

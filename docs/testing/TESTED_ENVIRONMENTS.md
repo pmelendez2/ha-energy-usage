@@ -1,11 +1,15 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Tested Environments
 
-> **Audience:** Users, testers, developers, and maintainers
-> **Purpose:** Record reproducible Energy Usage compatibility evidence and its limits.
-> **Status:** Pre-release verification baseline; not a claim of HACS acceptance
-> **Release:** 0.1.0
-> **Last Updated:** 2026-10-23
+**Audience:** Users, testers, developers, and maintainers
+
+**Purpose:** Record reproducible Energy Usage compatibility evidence and its limits.
+
+**Status:** v0.1.0 production verified; v0.1.1 not yet runtime validated
+
+**Release:** 0.1.1
+
+**Last Updated:** 2026-10-23
 
 ## Verification scope
 
@@ -22,6 +26,7 @@ compatibility with every Home Assistant version or Linux distribution.
 | Development Home Assistant (`ha-energy-dev`) | Home Assistant Container on `sparta`, port 8124; exact Core version not independently captured for this release | Integration configured with electricity and gas meters; Recorder statistics imported; Energy Dashboard and Explorer UI exercised | Runtime-tested in development |
 | Development baseline documented by project | Home Assistant Core 2026.9.4; Frontend 20260826.7 | Versions recorded in [Test Plan](TEST_PLAN.md); do not assume this is the currently running dev-container build without confirming | Version baseline, not a distinct tested environment |
 | Energy Ingest backend | Version 0.1.5 release candidate used in integration verification | Authenticated meter/history API, electricity and gas windows, DST handling | Integration dependency exercised; not a HA compatibility certification |
+| Production `piha` | Home Assistant Container (Swarm), `hass_homeassistant`; Energy Ingest API `0.1.5-rc.3`; 2026-10-26 | v0.1.0 installed through HACS custom repository, 2 discovered meter devices, initial Recorder imports, electricity and gas Energy Dashboard graphs, Explorer card | Verified production installation and consumption-history display; Home Assistant Core version not recorded in the session |
 
 ## Verified test results
 
@@ -34,6 +39,8 @@ compatibility with every Home Assistant version or Linux distribution.
 | Explorer static HTTP resource | HTTP 200 | `/energy_usage/energy-usage-explorer.js?v=0.1.0` on development Home Assistant |
 | Explorer UI manual verification | PASS | Hourly bars, line charts, date navigation, selected observation details |
 | Home Assistant Energy Dashboard | Verified in development | Electricity in kWh and gas in thm; no invented missing readings |
+| Production history and graphs, 2026-10-26 | Both commodities passed manual visual verification | Electricity: 9,480 hourly readings; gas: 395 daily readings; both resolved with no issues; 2 devices and Energy Dashboard/Explorer visible |
+| HACS release checks for v0.1.0 | 10 PR checks passed, 0 failing | HACS, hassfest, CI and Python compatibility checks as reported by maintainer |
 
 The development Recorder checks exercised **initial historical import**. They
 must not be interpreted as verification of automatic incremental sync,
@@ -43,10 +50,8 @@ correction-safe reimport into existing series, or automatic gap filling.
 
 - Home Assistant Core versions other than the development baseline shown above.
 - Different Home Assistant installation methods or host operating systems.
-- Installation and upgrade from a publicly published HACS release.
-- Production deployment of this specific `0.1.0` integration release.
-- GitHub HACS Action, hassfest, and compatibility workflow results for the
-  eventual release commit, until those checks have completed.
+- Upgrade behavior from v0.1.0 to v0.1.1, which is not yet released.
+- HACS default-catalog approval (custom-repository installation is verified).
 
 ## Evidence required for each new tested environment
 

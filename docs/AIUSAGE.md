@@ -1,11 +1,15 @@
 <!-- SPDX-License-Identifier: MIT -->
 # AI Usage
 
-> **Audience:** Developers and maintainers
-> **Purpose:** AI Usage reference for Energy Usage.
-> **Status:** Current documentation baseline
-> **Release:** 0.1.0
-> **Last Updated:** 2026-10-23
+**Audience:** Developers and maintainers
+
+**Purpose:** Record AI assistance and human validation per release.
+
+**Status:** Current documentation baseline
+
+**Release:** 0.1.1
+
+**Last Updated:** 2026-10-23
 
 ## Purpose
 
@@ -29,13 +33,13 @@ AI assisted in their discussion or drafting.
 
 | Release | AI Tool | Model | Date Range |
 |---|---|---|---|
-| 0.1.0 (pre-release) | ChatGPT | GPT-5.6 Sol, GPT-6 | 2026-09-28 - 2026-10-23 |
+| 0.1.0 | ChatGPT | GPT-5.6 Sol, GPT-6 | 2026-09-28 - 2026-10-26 |
 
-### 0.1.0 (pre-release)
+### 0.1.0 (published 2026-10-26)
 
 * AI Tool: ChatGPT
 * Models: GPT-5.6 Sol, GPT-6
-* Date Range: 2026-09-28 - 2026-10-23
+* Date Range: 2026-09-28 - 2026-10-26
 * Maintainer Review: Required
 
 #### Areas of AI assistance

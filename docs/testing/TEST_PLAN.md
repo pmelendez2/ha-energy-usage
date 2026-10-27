@@ -1,11 +1,15 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Test Plan
 
-> **Audience:** Maintainers and contributors
-> **Purpose:** Test Plan reference for Energy Usage.
-> **Status:** Current documentation baseline
-> **Release:** 0.1.0
-> **Last Updated:** 2026-10-23
+**Audience:** Maintainers and contributors
+
+**Purpose:** Test Plan reference for Energy Usage.
+
+**Status:** Current documentation baseline
+
+**Release:** 0.1.1
+
+**Last Updated:** 2026-10-23
 
 The recorded verification matrix and its evidence are maintained in
 [Tested Environments](TESTED_ENVIRONMENTS.md).

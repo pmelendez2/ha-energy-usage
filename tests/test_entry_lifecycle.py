@@ -61,7 +61,9 @@ class LifecycleTests(unittest.IsolatedAsyncioTestCase):
         )
         const = types.ModuleType("homeassistant.const")
         const.CONF_URL = "url"
-        const.Platform = types.SimpleNamespace(SENSOR="sensor")
+        const.Platform = types.SimpleNamespace(
+            SENSOR="sensor", BUTTON="button"
+        )
         exceptions = types.ModuleType("homeassistant.exceptions")
         exceptions.ConfigEntryAuthFailed = type(
             "ConfigEntryAuthFailed", (Exception,), {}
