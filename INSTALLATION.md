@@ -1,36 +1,99 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Install and configure Energy Usage for Home Assistant
 
-> **Audience:** Users and administrators
-> **Purpose:** Install and configure Energy Usage for Home Assistant reference for Energy Usage.
-> **Status:** Release candidate
-> **Release:** 0.1.0
-> **Last Updated:** 2026-10-23
+**Start here:** [Quick Start](QUICKSTART.md) is the concise installation
+path for upcoming 0.1.1 improvements. This document retains the detailed
+0.1.0 manual instructions and advanced validation procedures.
+
+**Audience:** Users and administrators
+
+**Purpose:** Guide first-time installation and usage-history import.
+
+**Status:** Published 0.1.0; guided workflow proposed for 0.1.1
+
+**Release:** 0.1.1
+
+**Last Updated:** 2026-10-23
 
 This guide installs **Energy Usage** as a Home Assistant **custom integration**,
 imports initial electricity and gas history, configures the built-in Energy
 Dashboard, and optionally installs the Energy Usage Explorer custom card.
 
-**Release:** 0.1.0 (release candidate; publication pending).
-HACS custom-repository installation requires a published compatible release.
+**Published release:** 0.1.0 is available on GitHub Releases.
+The guided import buttons are proposed for unreleased 0.1.1.
 Default HACS catalog inclusion is a separate approval process.
 
 ## 1. Prerequisites
 
-Before starting, confirm the following:
+1. **Install Energy Ingest and its MariaDB database first.** Follow the
+   [Energy Ingest deployment instructions](https://github.com/pmelendez2/energy_ingest)
+   for your host. The Energy Usage integration does not create that database.
+2. **Import actual electricity or natural gas observations into Energy
+   Ingest** before setting up Energy Usage in Home Assistant. An empty
+   database or newly registered meters alone are not enough.
+3. **Start the Energy Ingest API** and confirm its production deployment
+   passes verification. Record the API hostname and port reachable from Home
+   Assistant. `127.0.0.1` inside Home Assistant ordinarily refers to the
+   Home Assistant container, not the separate Energy Ingest container.
+4. **Locate the generated Home Assistant-specific bearer token.** Use the
+   steps below to display it privately and paste it into Home Assistant.
+5. **Run Home Assistant with Recorder enabled**, an appropriately configured
+   local time zone, and access to the API. For a manual installation you
+   also need access to its configuration directory (usually `/config`).
 
-- Home Assistant is running, Recorder is enabled, and you know its **config**
-  directory (inside the container this is typically `/config`).
-- The separate **Energy Ingest** server has already imported and validated
-  actual electricity and gas observations.
-- You know the **Energy Ingest API address reachable from Home Assistant**,
-  and have a Home Assistant-specific API bearer token. `127.0.0.1` inside a
-  Home Assistant container is **not** the Energy Ingest host unless both share
-  the same network namespace.
-- You can discover the correct physical meter IDs using Energy Ingest meter
-  inventory. Do **not** assume meter 1 / meter 2 on another installation.
-- Home Assistant's **Settings → System → General → Time zone** matches the
-  intended local reporting time zone.
+### Confirm Energy Ingest data is ready
+
+On the **Energy Ingest production host**, run these read-only checks:
+
+```bash
+"$HOME/energy-ingest-prod/scripts/verify-prod.sh"
+
+"$HOME/energy-ingest-prod/scripts/meter-prod.sh" list
+
+"$HOME/energy-ingest-prod/scripts/analyze-prod-data.sh"
+```
+
+The verification should pass; the meter list should show your electricity
+and/or gas meter with associated resources. Data analysis should report
+imported resources, hourly electricity or daily gas coverage, and any
+overlapping-source differences. If the database is empty, import your utility
+files using the Energy Ingest installation's import procedure first.
+These commands assume the standard production bundle under
+`$HOME/energy-ingest-prod`; adjust the installation directory if different.
+
+### Copy the bearer token
+
+The Energy Ingest production installer stores the **Home Assistant-specific
+API token** in an owner-readable secret file. For the deployed production
+bundle tested on `piha`, its exact path is:
+
+```text
+$HOME/energy-ingest-prod/deploy/docker-compose/prod-secrets/ha_energy_dev_api_token
+```
+
+Despite `dev` in the filename, this is the dedicated Home Assistant API
+token created by that production installer. On the **Energy Ingest host**:
+
+```bash
+TOKEN_FILE="$HOME/energy-ingest-prod/deploy/docker-compose/"
+TOKEN_FILE="${TOKEN_FILE}prod-secrets/ha_energy_dev_api_token"
+
+if [[ -s "$TOKEN_FILE" ]]; then
+    cat "$TOKEN_FILE"
+else
+    printf 'Home Assistant API token file not found\n' >&2
+fi
+```
+
+Copy only the single token value displayed, beginning with `ei_`. In the
+Home Assistant **Add integration → Energy Usage** dialog, paste it into
+the **API bearer token** field; put the hostname and port into the
+separate **API URL** field. Do not include `Bearer`, quotes, spaces, or the
+filename. Close or clear the terminal after copying so the token does not
+remain visible. Never paste it into chat, logs, dashboard cards, or Git.
+
+If this file does not exist, use the credentials path documented by your
+installed Energy Ingest production package; do not create a random substitute.
 
 **Security:** Do not place bearer tokens in card YAML, source code, browser
 JavaScript, or support logs. Keep the token in the integration configuration.
@@ -59,13 +122,22 @@ Do not copy the entire Git repository into `custom_components/`. Do not apply
 an example developer host path to production without checking the mount.
 Restart the Home Assistant instance, then refresh the browser.
 
-### Option B: HACS custom repository (once released)
+### Option B: HACS custom repository
 
-If HACS is installed and a public compatible repository is available, open
-**HACS → ⋮ → Custom repositories**, enter the published GitHub repository URL,
-select **Integration**, add it, then download **Energy Usage**. Restart Home
-Assistant and refresh the browser. This is a **custom repository** workflow;
-the integration is not claimed to be listed in HACS by default.
+The HACS custom repository is:
+
+```text
+https://github.com/pmelendez2/ha_energy_usage
+```
+
+1. Open **HACS** and its three-dot menu → **Custom repositories**.
+2. Paste that exact URL, select category **Integration**, then **Add**.
+3. Search HACS for **Energy Usage** and download the latest published release.
+   If it is already listed, open it directly instead of adding it again.
+4. Restart Home Assistant and refresh the browser.
+
+This is a custom-repository installation until HACS's default catalog
+accepts the integration.
 
 Official HACS documentation:
 https://www.hacs.dev/docs/faq/custom_repositories/
@@ -76,7 +148,9 @@ https://www.hacs.dev/docs/faq/custom_repositories/
 2. Search for **Energy Usage**.
 3. Enter the reachable **Energy Ingest API base URL**, such as
    `http://YOUR-ENERGY-INGEST-HOST:8080` (example only).
-4. Enter the dedicated **API bearer token**. Never share it in support output.
+4. On the Energy Ingest host, follow [Copy the bearer token](#copy-the-bearer-token).
+   Paste the generated `ei_...` value into the **API bearer token** field.
+   Do not include the `Bearer` prefix. Never share it in support output.
 5. Submit. Confirm the meter inventory is discovered and check that the
    electricity and gas physical meters are correctly identified.
 
@@ -86,10 +160,21 @@ attempting historical imports. Do not delete Recorder data to fix API auth.
 
 ## 4. Validate the source history before importing
 
-The initial import trusts Energy Ingest to resolve and validate canonical
-meter intervals. Confirm each meter's stream has `resolved: true`, an expected
-interval count, and zero issues. Use Energy Ingest's authenticated inspection
-or administration tools; do not expose the token in screenshots.
+For most users, the [read-only production data checks](#confirm-energy-ingest-data-is-ready)
+from step 1 are sufficient preparation. Run `verify-prod.sh`, `meter-prod.sh
+list`, and `analyze-prod-data.sh` on the Energy Ingest host and confirm that
+the expected meters and coverage appear. If desired, the analysis script's
+`--details` option shows diagnostic resource IDs and overlapping values:
+
+```bash
+"$HOME/energy-ingest-prod/scripts/analyze-prod-data.sh" --details
+```
+
+The guided **0.1.1 import button** then validates the actual accepted API
+stream (`resolved: true`, `issues: []`) itself and refuses to import if the
+source is unresolved. Users do not need to construct API calls or expose
+their token for this validation. In **0.1.0**, the manual import action also
+checks the accepted observations and refuses invalid or unresolved data.
 
 Electricity source cadence is normally **hourly**. Natural gas source cadence
 is normally **daily**. A reported zero reading is actual data. An absent
@@ -97,10 +182,20 @@ reading is missing data and must **not** be replaced with zero.
 
 ## 5. Import historical usage into Recorder
 
-> **Important — initial import only:** The current action refuses to append to
-> or replace an existing statistic series. Choose the **complete known history
-> range before the first import**. Do not test with a short initial import and
-> then expect to extend the same series with another action call.
+**Important — initial import only:** This release refuses to append to or
+replace existing statistics. Do not import a short sample period first.
+Do not delete good history in order to repeat the initial import.
+
+### Recommended for 0.1.1 and later
+
+Open **Settings → Devices & services → Energy Usage**, select each physical
+meter device, and press **Import complete history (once)**. The button
+automatically verifies accepted source readings, discovers their actual
+date range, and queues the initial Recorder statistics. It will report
+existing history as a validation error rather than overwriting it. No IDs,
+dates, service YAML, or separate API calls are needed.
+
+### Manual action for released 0.1.0
 
 Open **Developer tools / Settings → Tools → Actions** (wording depends on your
 Home Assistant version). Select the action
@@ -203,7 +298,8 @@ After installing Energy Usage and restarting Home Assistant:
 
 1. Open **Settings → Dashboards**.
 2. Open the three-dot menu and select **Resources**.
-3. Add the following resource URL:
+3. Add the resource URL matching your installed version. For released
+   v0.1.0, use:
 
    `/energy_usage/energy-usage-explorer.js?v=0.1.0`
 

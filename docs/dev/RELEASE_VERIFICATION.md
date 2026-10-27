@@ -1,15 +1,15 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Home Assistant Integration Release Verification
 
-> **Audience:** Developers and maintainers
-> **Purpose:** Home Assistant Integration Release Verification reference for Energy Usage.
-> **Status:** Current documentation baseline
-> **Release:** 0.1.0
-> **Last Updated:** 2026-10-23
+**Audience:** Developers and maintainers
 
-**Purpose:** Define repeatable test, package, and release verification.
+**Purpose:** Verify integration changes and prepare signed releases.
 
-**Intended Audience:** Energy Usage developers and maintainers.
+**Status:** Current documentation baseline
+
+**Release:** 0.1.1
+
+**Last Updated:** 2026-10-27
 
 ## Local verification
 
@@ -28,7 +28,8 @@ python3 scripts/check_documentation.py
 git diff --check
 ```
 
-The CI `isolated` job runs the same checks. The independent Python
+The CI `isolated` job runs the standard-library test and package checks;
+`pytest` is an additional optional local check. The independent Python
 compatibility matrix covers 3.13 and 3.14. Neither constitutes a real
 Home Assistant runtime integration test.
 

@@ -1,15 +1,30 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Changelog
 
-> **Audience:** Users and administrators
-> **Purpose:** Changelog reference for Energy Usage.
-> **Status:** Release candidate
-> **Release:** 0.1.0
-> **Last Updated:** 2026-10-23
+**Audience:** Users and administrators
+
+**Purpose:** Changelog reference for Energy Usage.
+
+**Status:** Release candidate
+
+**Release:** 0.1.1
+
+**Last Updated:** 2026-10-23
 
 ## Unreleased
 
-No changes documented since the initial release candidate.
+### Planned for 0.1.1
+
+- One-click, per-meter initial import of complete verified historical data.
+- Automatic discovery of the meter's actual local-calendar coverage.
+- Clearer duplicate-import rejection and a concise installation quick start.
+- Recorder-aware pending-import checks with safe retry guidance after restart;
+  no retry while an earlier asynchronous write may still be queued.
+- HACS default-catalog submission readiness checklist.
+- Per-meter historical import status, verified against persisted Recorder
+  statistics, with the last in-session attempt and any error reported.
+- Last import attempt and last import error are visible as separate
+  per-meter diagnostic sensors; no developer tools needed.
 
 ## 0.1.0 — Initial release candidate
 

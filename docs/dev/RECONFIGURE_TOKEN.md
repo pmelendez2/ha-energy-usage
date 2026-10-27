@@ -3,11 +3,15 @@
 
 # API Token Reconfiguration
 
-> **Audience:** Developers and maintainers
-> **Purpose:** API Token Reconfiguration reference for Energy Usage.
-> **Status:** Current documentation baseline
-> **Release:** 0.1.0
-> **Last Updated:** 2026-10-23
+**Audience:** Developers and maintainers
+
+**Purpose:** Define safe token rotation and configuration revalidation.
+
+**Status:** Current documentation baseline
+
+**Release:** 0.1.1
+
+**Last Updated:** 2026-10-27
 
 **Purpose:** Describe the user-facing API token rotation workflow and
 its authentication safety requirements.
@@ -35,6 +39,13 @@ container, not production Home Assistant.
 
 ## Limitations
 
+The backend production installer provisions a dedicated, persistent
+Home Assistant API token. Its protected file and copy instructions
+are documented in [Installation](../../INSTALLATION.md#copy-the-bearer-token).
+The token must be handled by `energy_ingest`'s established authenticated
+client-token management, with verifier-only storage and explicit rotation.
+Do not independently generate an incompatible token in this integration.
+
 Historical Recorder statistics and stream correctness are separate
-milestones. Successfully saving a replacement API token does not
-validate utility consumption totals or fill missing periods.
+concerns. Saving a replacement API token does not validate utility
+consumption totals or fill missing periods.

@@ -19,7 +19,7 @@ from homeassistant.helpers import config_validation as cv
 from .api import EnergyApi, EnergyApiError, EnergyAuthError
 from .const import CONF_TOKEN, DOMAIN
 
-PLATFORMS = [Platform.SENSOR]
+PLATFORMS = [Platform.SENSOR, Platform.BUTTON]
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
@@ -94,6 +94,9 @@ async def async_unload_entry(hass, entry):
     )
 
     if unloaded:
+        from .import_status import clear_entry
+
+        clear_entry(entry.entry_id)
         hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
         if not hass.data.get(DOMAIN) and hasattr(hass, "services"):
             from .history_import_service import SERVICE
