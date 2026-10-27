@@ -11,7 +11,7 @@
 
 **Release:** 0.1.1
 
-**Last Updated:** 2026-10-23
+**Last Updated:** 2026-10-27
 
 ## Purpose
 
@@ -42,7 +42,8 @@ commit it. Container loopback addresses are container-specific.
 - Home Assistant starts with no manifest or import errors.
 - The Energy Usage config flow accepts valid API credentials.
 - Invalid credentials produce reauthentication, not silent failures.
-- Meter discovery creates only supported diagnostic entities.
+- Meter discovery creates the supported diagnostic and import-button
+  entities; button presses never import automatically on setup.
 - Reload and unload do not leak tasks or duplicate entities.
 - Network failure and recovery work without restarting MariaDB.
 

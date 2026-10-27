@@ -25,4 +25,3 @@ def check_initial_import(pending, key, history_exists):
             "Statistics and Recorder logs. If no history persists, "
             "restart Home Assistant before retrying."
         )
-
