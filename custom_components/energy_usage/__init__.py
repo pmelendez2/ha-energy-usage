@@ -94,6 +94,9 @@ async def async_unload_entry(hass, entry):
     )
 
     if unloaded:
+        from .import_status import clear_entry
+
+        clear_entry(entry.entry_id)
         hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
         if not hass.data.get(DOMAIN) and hasattr(hass, "services"):
             from .history_import_service import SERVICE

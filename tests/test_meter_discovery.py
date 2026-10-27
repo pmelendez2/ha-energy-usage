@@ -27,6 +27,8 @@ class DiscoveryTests(unittest.IsolatedAsyncioTestCase):
             "homeassistant",
             "homeassistant.components",
             "homeassistant.components.sensor",
+            "homeassistant.components.recorder",
+            "homeassistant.components.recorder.statistics",
             "homeassistant.helpers",
             "homeassistant.helpers.entity",
             "homeassistant.helpers.update_coordinator",
@@ -37,6 +39,12 @@ class DiscoveryTests(unittest.IsolatedAsyncioTestCase):
         sys.modules["homeassistant.components.sensor"].SensorEntity = type(
             "SensorEntity", (), {}
         )
+        sys.modules[
+            "homeassistant.components.recorder"
+        ].get_instance = Mock()
+        sys.modules[
+            "homeassistant.components.recorder.statistics"
+        ].get_last_statistics = Mock()
         sys.modules["homeassistant.helpers.entity"].EntityCategory = (
             types.SimpleNamespace(DIAGNOSTIC="diagnostic")
         )
@@ -69,8 +77,8 @@ class DiscoveryTests(unittest.IsolatedAsyncioTestCase):
     async def test_one_registration_sensor_per_meter(self):
         coordinator = types.SimpleNamespace(data={
             "meters": [
-                {"id": 1, "display_name": "Electric"},
-                {"id": 2, "display_name": "Gas"},
+                {"id": 1, "display_name": "Electric", "commodity": 1},
+                {"id": 2, "display_name": "Gas", "commodity": 7},
             ]
         })
         entry = types.SimpleNamespace(entry_id="example-entry")
@@ -80,14 +88,26 @@ class DiscoveryTests(unittest.IsolatedAsyncioTestCase):
         add = Mock()
         await self.module.async_setup_entry(ha, entry, add)
         sensors = add.call_args.args[0]
-        self.assertEqual(len(sensors), 2)
+        self.assertEqual(len(sensors), 8)
         self.assertEqual(
-            [sensor.native_value for sensor in sensors],
+            [sensor.native_value for sensor in sensors[::4]],
             ["Registered", "Registered"],
         )
         self.assertTrue(all(
             "_registration" in sensor._attr_unique_id
-            for sensor in sensors
+            for sensor in sensors[::4]
+        ))
+        self.assertTrue(all(
+            "_import_status" in sensor._attr_unique_id
+            for sensor in sensors[1::4]
+        ))
+        self.assertTrue(all(
+            "_last_attempt" in sensor._attr_unique_id
+            for sensor in sensors[2::4]
+        ))
+        self.assertTrue(all(
+            "_last_error" in sensor._attr_unique_id
+            for sensor in sensors[3::4]
         ))
 
     async def test_removed_meter_is_not_registered(self):
@@ -98,6 +118,47 @@ class DiscoveryTests(unittest.IsolatedAsyncioTestCase):
             coordinator, meter, entry
         )
         self.assertIsNone(sensor.native_value)
+
+    async def test_status_reads_recorder_before_reporting_imported(self):
+        entry = types.SimpleNamespace(entry_id="example-entry")
+        meter = {"id": 1, "display_name": "Electric", "commodity": 1}
+        recorder = sys.modules["homeassistant.components.recorder"]
+        instance = Mock()
+
+        async def read_history(*args):
+            return read_history.rows
+
+        read_history.rows = {}
+        instance.async_add_executor_job = read_history
+        recorder.get_instance.return_value = instance
+        sensor = self.module.HistoryImportStatusSensor(
+            object(), entry, meter
+        )
+        await sensor.async_update()
+        self.assertEqual(sensor._attr_native_value, "Not imported")
+        read_history.rows = {"energy_usage:electricity_meter_1": [{}]}
+        await sensor.async_update()
+        self.assertEqual(sensor._attr_native_value, "Imported")
+
+    async def test_last_attempt_and_error_are_device_entities(self):
+        entry = types.SimpleNamespace(entry_id="example-entry")
+        meter = {"id": 9, "display_name": "Electric", "commodity": 1}
+        import_status = sys.modules[
+            "_discovery_test.import_status"
+        ]
+        key = import_status.key_for(entry.entry_id, 9)
+        attempt = self.module.LastImportAttemptSensor(entry, meter)
+        error = self.module.LastImportErrorSensor(entry, meter)
+        await attempt.async_update()
+        self.assertEqual(attempt._attr_native_value, "Not attempted")
+        self.assertEqual(error._attr_native_value, "None")
+        import_status.started(key)
+        import_status.failed(key, "History already exists")
+        await attempt.async_update()
+        await error.async_update()
+        self.assertEqual(attempt._attr_native_value, "Failed")
+        self.assertEqual(error._attr_native_value, "History already exists")
+        import_status.clear_entry(entry.entry_id)
 
 
 if __name__ == "__main__":

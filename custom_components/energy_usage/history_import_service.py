@@ -31,6 +31,7 @@ from .history_import_guard import (
     InitialImportBlocked, check_initial_import,
 )
 from .history_range import complete_history_dates
+from .import_status import failed, key_for, queued, started
 from .statistics_import import StatisticsImportError, build_statistics
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,13 +48,15 @@ _QUEUED_IMPORTS = set()
 
 async def async_import_complete_history(hass, entry, meter_id):
     """Discover the full verified range and import it once."""
-    meter = _find_meter(hass, entry, meter_id)
+    key = key_for(entry.entry_id, meter_id)
+    started(key)
     api = EnergyApi(
         async_get_clientsession(hass),
         entry.data[CONF_URL], entry.data[CONF_TOKEN],
     )
     # The stream is read-only and contains all accepted observations.
     try:
+        meter = _find_meter(hass, entry, meter_id)
         stream = await api.stream(meter_id)
         start, end = complete_history_dates(
             stream, int(meter["commodity"]), hass.config.time_zone
@@ -61,11 +64,19 @@ async def async_import_complete_history(hass, entry, meter_id):
         await _import_range(hass, entry, meter, start, end)
     except (HistoryValidationError, StatisticsImportError,
             InitialImportBlocked, ValueError) as exc:
+        failed(key, exc)
         raise ServiceValidationError(str(exc)) from exc
     except EnergyApiError as exc:
+        failed(key, "Cannot read the accepted Energy Ingest history")
         raise HomeAssistantError(
             "Cannot read the accepted Energy Ingest history"
         ) from exc
+    except ServiceValidationError as exc:
+        failed(key, exc)
+        raise
+    except Exception as exc:
+        failed(key, "Unexpected import error; check Home Assistant logs")
+        raise
 
 
 def _find_meter(hass, entry, meter_id):
@@ -139,6 +150,7 @@ async def _import_range(hass, entry, meter, start_day, end_day):
         # persistence. Keep the reservation until read-back confirms rows,
         # or until Home Assistant has restarted and drained its old queue.
         _QUEUED_IMPORTS.add(lock_key)
+        queued(lock_key)
         _LOGGER.info(
             "Queued %d validated usage readings for meter %d; "
             "%d missing intervals were not filled",
@@ -153,6 +165,8 @@ async def async_register_history_service(hass, entry):
 
     async def import_history(call):
         meter_id = call.data["meter_id"]
+        key = key_for(entry.entry_id, meter_id)
+        started(key)
         start_day = call.data["start_date"]
         end_day = call.data["end_date"]
 
@@ -162,16 +176,24 @@ async def async_register_history_service(hass, entry):
         if isinstance(end_day, str):
             end_day = date.fromisoformat(end_day)
 
-        meter = _find_meter(hass, entry, meter_id)
         try:
+            meter = _find_meter(hass, entry, meter_id)
             await _import_range(hass, entry, meter, start_day, end_day)
         except (HistoryValidationError, StatisticsImportError,
                 InitialImportBlocked, ValueError) as exc:
+            failed(key, exc)
             raise ServiceValidationError(str(exc)) from exc
         except EnergyApiError as exc:
+            failed(key, "Cannot read the accepted Energy Ingest history")
             raise HomeAssistantError(
                 "Cannot read the accepted Energy Ingest history"
             ) from exc
+        except ServiceValidationError as exc:
+            failed(key, exc)
+            raise
+        except Exception:
+            failed(key, "Unexpected import error; check Home Assistant logs")
+            raise
 
     hass.services.async_register(
         DOMAIN, SERVICE, import_history, schema=SCHEMA
