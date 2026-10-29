@@ -7,11 +7,26 @@
 
 **Status:** Release candidate
 
-**Release:** 0.1.1
+**Release:** 0.1.2
 
-**Last Updated:** 2026-10-23
+**Last Updated:** 2026-10-29
 
 ## Unreleased
+
+### In development for 0.1.2
+
+- Drain admitted scheduled and manual synchronization operations during
+  configuration-entry unload before releasing shared meter locks.
+- Prevent new synchronization operations after runtime shutdown begins.
+- Normalize routine scheduler and persistence logging levels.
+- Add regression tests for shutdown draining and transient API failures.
+- Preserve complete canonical Recorder read-back and correction safeguards.
+- Keep initial import separate from recurring correction-safe synchronization.
+- Update README, installation and developer verification guidance to reflect
+  the development implementation and its outstanding runtime acceptance.
+- Clarify that unload/reload, Recorder shutdown, API recovery and production
+  upgrade acceptance are not yet verified in live Home Assistant.
+
 
 ### Planned for 0.1.1
 

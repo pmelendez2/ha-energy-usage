@@ -101,6 +101,28 @@ class LifecycleTests(unittest.IsolatedAsyncioTestCase):
         constants.CONF_TOKEN = "api_token"
         constants.DOMAIN = "energy_usage"
         sys.modules["_energy_test.const"] = constants
+        scheduler = types.ModuleType(
+            "_energy_test.statistics_sync_schedule"
+        )
+        scheduler.stop_automatic_sync = AsyncMock()
+        sys.modules["_energy_test.statistics_sync_schedule"] = (
+            scheduler
+        )
+
+        sync_service = types.ModuleType(
+            "_energy_test.statistics_sync_service"
+        )
+        sync_service.forget_runtime = AsyncMock()
+        sync_service.existing_runtime_for_entry = Mock(
+            return_value=None
+        )
+        scheduler.start_automatic_sync = Mock()
+        sys.modules["_energy_test.statistics_sync_service"] = (
+            sync_service
+        )
+
+        cls.scheduler = scheduler
+        cls.sync_service = sync_service
         spec = importlib.util.spec_from_file_location(
             "_energy_test", COMPONENT / "__init__.py"
         )
@@ -116,6 +138,11 @@ class LifecycleTests(unittest.IsolatedAsyncioTestCase):
         sys.modules.update(cls.saved)
 
     def setUp(self):
+        self.scheduler.start_automatic_sync.reset_mock()
+        self.scheduler.stop_automatic_sync.reset_mock()
+        self.sync_service.forget_runtime.reset_mock()
+        self.sync_service.existing_runtime_for_entry.reset_mock()
+        self.sync_service.existing_runtime_for_entry.return_value = None
         self.entry = _Entry()
         self.ha = types.SimpleNamespace(
             data={},
@@ -144,6 +171,62 @@ class LifecycleTests(unittest.IsolatedAsyncioTestCase):
             self.ha, self.entry
         ))
         self.assertNotIn(self.entry.entry_id, self.ha.data["energy_usage"])
+        self.scheduler.stop_automatic_sync.assert_awaited_once_with(
+            self.entry
+        )
+        self.sync_service.forget_runtime.assert_awaited_once_with(
+            self.entry
+        )
+
+    async def test_unload_closes_and_drains_before_platforms(self):
+        runtime = Mock()
+        runtime.drain = AsyncMock()
+        self.sync_service.existing_runtime_for_entry.return_value = runtime
+        await self.module.async_setup_entry(self.ha, self.entry)
+
+        async def check_unload(*args):
+            runtime.begin_close.assert_called_once_with()
+            runtime.drain.assert_awaited_once_with()
+            self.scheduler.stop_automatic_sync.assert_awaited_once()
+            return True
+
+        self.ha.config_entries.async_unload_platforms.side_effect = (
+            check_unload
+        )
+        self.assertTrue(await self.module.async_unload_entry(
+            self.ha, self.entry
+        ))
+        runtime.reopen.assert_not_called()
+
+    async def test_failed_unload_reopens_and_restarts_scheduler(self):
+        runtime = Mock()
+        runtime.drain = AsyncMock()
+        self.sync_service.existing_runtime_for_entry.return_value = runtime
+        await self.module.async_setup_entry(self.ha, self.entry)
+        self.ha.config_entries.async_unload_platforms.return_value = False
+        self.assertFalse(await self.module.async_unload_entry(
+            self.ha, self.entry
+        ))
+        runtime.reopen.assert_called_once_with()
+        self.scheduler.start_automatic_sync.assert_called_once_with(
+            self.ha, self.entry, runtime
+        )
+        self.sync_service.forget_runtime.assert_not_awaited()
+
+    async def test_unload_exception_restores_runtime(self):
+        runtime = Mock()
+        runtime.drain = AsyncMock()
+        self.sync_service.existing_runtime_for_entry.return_value = runtime
+        await self.module.async_setup_entry(self.ha, self.entry)
+        self.ha.config_entries.async_unload_platforms.side_effect = (
+            RuntimeError("platform failure")
+        )
+        with self.assertRaises(RuntimeError):
+            await self.module.async_unload_entry(self.ha, self.entry)
+        runtime.reopen.assert_called_once_with()
+        self.scheduler.start_automatic_sync.assert_called_once_with(
+            self.ha, self.entry, runtime
+        )
 
     async def test_auth_error_requests_reauthentication(self):
         self.instance.meters.side_effect = self.api.EnergyAuthError("bad")

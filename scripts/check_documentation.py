@@ -4,17 +4,18 @@
 from __future__ import annotations
 
 import json
+from update_documentation_version import synchronize
 import re
 from pathlib import Path
 from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / 'custom_components/energy_usage/manifest.json'
-VERSION = json.loads(MANIFEST.read_text())['version']
+VERSION = (ROOT / 'release/VERSION').read_text().strip()
 REQUIRED = ('Audience', 'Purpose', 'Status', 'Release', 'Last Updated')
 LINK = re.compile(r'(?<!!)\[[^\]]+\]\(([^)]+)\)')
 HEADING = re.compile(r'^#{1,6}\s+(.+)$', re.M)
-errors = []
+errors = synchronize(ROOT, VERSION, check=True)
 files = sorted(p for p in ROOT.rglob('*.md') if not any(
     bit in  {'.git', '.venv', '.pytest_cache', 'node_modules', 'build', 'dist'}
     for bit in p.relative_to(ROOT).parts

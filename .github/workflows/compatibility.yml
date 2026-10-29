@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install test dependencies
-        run: python -m pip install aiohttp
+        run: python -m pip install aiohttp PyYAML
       - name: Unit regression suite
         run: python -m unittest discover -s tests -p 'test_*.py'
       - name: Compile Python

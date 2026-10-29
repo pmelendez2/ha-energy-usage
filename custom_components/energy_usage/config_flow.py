@@ -11,6 +11,10 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import EnergyApi, EnergyApiError, EnergyAuthError
 from .const import CONF_TOKEN, DEFAULT_URL, DOMAIN
+from .statistics_sync_settings import (
+    CONF_SYNC_HOURS, CONF_SYNC_STARTUP, DEFAULT_SYNC_HOURS,
+    DEFAULT_SYNC_STARTUP, SYNC_INTERVAL_CHOICES,
+)
 
 
 def connection_schema(default_url: str = DEFAULT_URL):
@@ -27,6 +31,11 @@ class EnergyUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Connect to an Energy Ingest instance using a bearer token."""
 
     VERSION = 1
+
+    @staticmethod
+    def async_get_options_flow(config_entry):
+        """Provide Home Assistant integration-specific preferences."""
+        return EnergyUsageOptionsFlow()
 
     async def _validate(self, url: str, token: str):
         """Confirm credentials and receive the available meter list."""
@@ -122,4 +131,47 @@ class EnergyUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
             ),
             errors=errors,
+        )
+
+class EnergyUsageOptionsFlow(config_entries.OptionsFlow):
+    """Configure automatic synchronization per integration entry."""
+
+    async def async_step_init(self, user_input=None):
+        """Persist the interval and startup preference."""
+        if user_input is not None:
+            hours = int(user_input[CONF_SYNC_HOURS])
+            if hours not in SYNC_INTERVAL_CHOICES:
+                raise ValueError("Unsupported sync interval")
+
+            return self.async_create_entry(
+                title="",
+                data={
+                    CONF_SYNC_HOURS: hours,
+                    CONF_SYNC_STARTUP: user_input[CONF_SYNC_STARTUP],
+                },
+            )
+
+        options = self.config_entry.options
+        hours = options.get(
+            CONF_SYNC_HOURS, DEFAULT_SYNC_HOURS
+        )
+        startup = options.get(
+            CONF_SYNC_STARTUP, DEFAULT_SYNC_STARTUP
+        )
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({
+                vol.Required(
+                    CONF_SYNC_HOURS,
+                    default=str(hours),
+                ): vol.In({
+                    str(key): label
+                    for key, label in SYNC_INTERVAL_CHOICES.items()
+                }),
+                vol.Required(
+                    CONF_SYNC_STARTUP,
+                    default=startup,
+                ): bool,
+            }),
         )

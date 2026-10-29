@@ -7,7 +7,7 @@
 
 **Status:** Published 0.1.0; 0.1.1 development
 
-**Release:** 0.1.1
+**Release:** 0.1.2
 
 **Last Updated:** 2026-10-23
 
@@ -59,7 +59,7 @@ install the Energy Ingest server.
 Before configuring Energy Usage in Home Assistant:
 
 1. Install **Energy Ingest** and initialize its MariaDB database using its
-   [production installation instructions](https://github.com/pmelendez2/energy_ingest).
+   [production installation instructions](https://github.com/pmelendez2/energy-ingest).
 2. Import actual electricity and/or natural gas usage into Energy Ingest.
    Confirm its physical meters and accepted usage are available. Simply
    creating an empty database is not sufficient.
@@ -77,9 +77,8 @@ have been validated.
 
 ## Get started
 
-For the shortest path, see [Quick Start](QUICKSTART.md). The guided
-complete-history import buttons described there are proposed for 0.1.1;
-released 0.1.0 still uses the manual action below.
+For the shortest path, see [Installation](INSTALLATION.md). The installation guide describes the initial import workflow and the
+0.1.2 synchronization functionality currently undergoing validation.
 
 Follow **[INSTALLATION.md](INSTALLATION.md)** from start to finish for:
 
@@ -96,10 +95,11 @@ Follow **[INSTALLATION.md](INSTALLATION.md)** from start to finish for:
 
 ## Current limitations
 
-- **Historical import is initial-import-only.** It refuses to overwrite an
-  existing statistic series. Incremental updates and correction-safe automatic
-  synchronization are not yet available; do not advertise this as a continuous
-  feed.
+- **Initial import and synchronization are separate operations.** The initial
+  importer refuses to overwrite existing statistics. The 0.1.2 development
+  synchronization service can reconcile verified canonical usage and accepted
+  corrections, including on a configured schedule. It is not yet released or
+  validated for production use.
 - **Gas observations are daily.** An hourly gas graph must not invent readings.
 - Custom card controls and source compatibility must be tested against each
   supported Home Assistant release.
@@ -124,7 +124,7 @@ See [Installation and configuration](INSTALLATION.md) for user setup,
 explicit initial import, Energy Dashboard, and the Explorer card.
 
 Versioned releases are published on the
-[GitHub Releases page](https://github.com/pmelendez2/ha_energy_usage/releases).
+[GitHub Releases page](https://github.com/pmelendez2/ha-energy-usage/releases).
 HACS custom-repository installation is distinct from default-catalog approval.
 
 ## Development and contributions
