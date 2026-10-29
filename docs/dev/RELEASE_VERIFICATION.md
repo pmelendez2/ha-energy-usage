@@ -7,9 +7,9 @@
 
 **Status:** Current documentation baseline
 
-**Release:** 0.1.1
+**Release:** 0.1.2
 
-**Last Updated:** 2026-10-27
+**Last Updated:** 2026-10-29
 
 ## Local verification
 
@@ -38,8 +38,11 @@ Home Assistant runtime integration test.
 Test with a disposable Home Assistant instance, using the published
 Energy Ingest HTTP API and a development-only bearer token. Confirm
 successful setup, two meter devices, sensor state, failure/recovery,
-and reload/unload. Explicit initial Recorder imports have been runtime-validated. Automatic
-correction-safe synchronization remains outside version 0.1.0.
+and reload/unload. Explicit initial Recorder imports have been runtime-validated. Automatic correction-safe synchronization is under development for 0.1.2.
+Verify that unload drains admitted synchronization work before runtime
+cleanup, that temporary API failures do not write statistics, and that
+subsequent cycles recover. Run these checks in disposable development HA;
+unit tests alone do not establish live Recorder shutdown safety.
 
 ## Publishing
 
@@ -47,3 +50,22 @@ Use a feature branch and signed commits, then a pull request and required
 CI checks before merging into protected `main`. GitHub release tags must
 match the `manifest.json` version. For HACS installation use the GitHub
 repository; the component-only ZIP is an optional manual-install artifact.
+
+## 0.1.2 lifecycle and recovery acceptance checklist
+
+Before release, use disposable Home Assistant and Energy Ingest environments:
+
+- Verify configured startup delay and periodic scheduling with both meters.
+- Start a synchronization, request config-entry unload, and verify that
+  admitted work finishes persistence verification before runtime cleanup.
+- Start manual and scheduled requests for the same meter; verify serialization.
+- During a temporary Energy Ingest API outage, confirm no new Recorder rows
+  are written and a later scheduled cycle recovers without fabricated data.
+- Verify an accepted source correction updates the full cumulative series.
+- Restart and reload repeatedly; check for duplicate listeners or stale locks.
+- Upgrade an existing 0.1.1 development installation in place, preserving
+  configuration, credentials, and historical Recorder statistics.
+- Confirm INFO/DEBUG logs for normal events and ERROR logs for failures.
+
+These are acceptance requirements, not claims of completed live testing.
+Do not deploy this development implementation to production until verified.

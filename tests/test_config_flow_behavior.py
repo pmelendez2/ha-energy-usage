@@ -66,11 +66,13 @@ class ConfigFlowTests(unittest.IsolatedAsyncioTestCase):
         vol = types.ModuleType("voluptuous")
         vol.Required = _Required
         vol.Schema = lambda value: value
+        vol.In = lambda value: value
         sys.modules["voluptuous"] = vol
         ha = types.ModuleType("homeassistant")
         ha.__path__ = []
         cfg = types.ModuleType("homeassistant.config_entries")
         cfg.ConfigFlow = _Flow
+        cfg.OptionsFlow = _Flow
         const = types.ModuleType("homeassistant.const")
         const.CONF_URL = "url"
         client = types.ModuleType("homeassistant.helpers.aiohttp_client")

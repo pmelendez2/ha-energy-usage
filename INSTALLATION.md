@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Install and configure Energy Usage for Home Assistant
 
-**Start here:** [Quick Start](QUICKSTART.md) is the concise installation
+**Start here:** [Installation](INSTALLATION.md) is the complete installation
 path for upcoming 0.1.1 improvements. This document retains the detailed
 0.1.0 manual instructions and advanced validation procedures.
 
@@ -11,7 +11,7 @@ path for upcoming 0.1.1 improvements. This document retains the detailed
 
 **Status:** Published 0.1.0; guided workflow proposed for 0.1.1
 
-**Release:** 0.1.1
+**Release:** 0.1.2
 
 **Last Updated:** 2026-10-23
 
@@ -346,8 +346,13 @@ Check all of the following before considering installation complete:
 
 ## 11. Important operational limits
 
-This initial integration is **not** an automatic, revision-aware synchronization
-service. New data and utility corrections will require a future supported
-correction-safe sync design. Do not treat the initial importer as a recurring
-update action. Billing dollars and solar sell-back monetary calculations are
-out of scope.
+The released initial-import workflow is distinct from the **0.1.2 development**
+correction-safe synchronization service. The latter supports manual and
+scheduled reconciliation of verified canonical electricity and natural-gas
+usage, including accepted corrections, but is **not yet production-validated**.
+During configuration-entry unload, scheduling stops and admitted operations
+are drained before their shared runtime is discarded. An API failure must
+not be interpreted as a successful synchronization; the next cycle may retry.
+Recorder imports are asynchronous and success requires complete read-back
+verification. Missing source periods are never synthesized. Billing dollars,
+rates, credits, and solar sell-back monetary calculations remain out of scope.

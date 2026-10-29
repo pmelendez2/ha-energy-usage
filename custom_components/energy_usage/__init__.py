@@ -84,22 +84,78 @@ async def async_setup_entry(hass, entry):
         from .history_import_service import async_register_history_service
 
         await async_register_history_service(hass, entry)
+        from .statistics_sync_service import (
+            async_register_sync_service,
+        )
+        await async_register_sync_service(hass, entry)
+        from .statistics_sync_preflight_service import (
+            async_register_preflight_service,
+        )
+        await async_register_preflight_service(hass, entry)
+        from .statistics_sync_service import runtime_for_entry
+        from .statistics_sync_schedule import start_automatic_sync
+        start_automatic_sync(hass, entry, runtime_for_entry(entry))
+        async def reload_on_options_change(hass, changed_entry):
+            """Apply changed synchronization options."""
+            await hass.config_entries.async_reload(
+                changed_entry.entry_id
+            )
+
+        entry.async_on_unload(
+            entry.add_update_listener(reload_on_options_change)
+        )
     return True
 
 
 async def async_unload_entry(hass, entry):
-    """Remove the integration without altering Energy Ingest data."""
-    unloaded = await hass.config_entries.async_unload_platforms(
-        entry, PLATFORMS
+    """Drain admitted synchronization before unloading platforms."""
+    from .statistics_sync_schedule import (
+        start_automatic_sync,
+        stop_automatic_sync,
+    )
+    from .statistics_sync_service import (
+        existing_runtime_for_entry,
+        forget_runtime,
     )
 
+    runtime = existing_runtime_for_entry(entry)
+    if runtime is not None:
+        runtime.begin_close()
+    try:
+        await stop_automatic_sync(entry)
+        if runtime is not None:
+            await runtime.drain()
+        unloaded = await hass.config_entries.async_unload_platforms(
+            entry, PLATFORMS
+        )
+    except BaseException:
+        if runtime is not None:
+            runtime.reopen()
+            start_automatic_sync(hass, entry, runtime)
+        raise
+    if not unloaded:
+        if runtime is not None:
+            runtime.reopen()
+            start_automatic_sync(hass, entry, runtime)
+        return False
     if unloaded:
+        # Keep the coordinator available until admitted work finishes.
+        await forget_runtime(entry)
         from .import_status import clear_entry
 
         clear_entry(entry.entry_id)
         hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
+
         if not hass.data.get(DOMAIN) and hasattr(hass, "services"):
             from .history_import_service import SERVICE
 
             hass.services.async_remove(DOMAIN, SERVICE)
+            from .statistics_sync_service import (
+                SERVICE as SYNC_SERVICE,
+            )
+            hass.services.async_remove(DOMAIN, SYNC_SERVICE)
+            from .statistics_sync_preflight_service import (
+                SERVICE as PREFLIGHT_SERVICE,
+            )
+            hass.services.async_remove(DOMAIN, PREFLIGHT_SERVICE)
     return unloaded

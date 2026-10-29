@@ -7,7 +7,7 @@
 
 **Status:** v0.1.0 production verified; v0.1.1 not yet runtime validated
 
-**Release:** 0.1.1
+**Release:** 0.1.2
 
 **Last Updated:** 2026-10-23
 

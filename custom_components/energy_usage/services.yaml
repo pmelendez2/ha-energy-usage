@@ -25,3 +25,30 @@ import_historical_usage:
       required: true
       selector:
         boolean:
+
+
+sync_preflight:
+  fields:
+    meter_id:
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 1
+          step: 1
+          mode: box
+
+sync_usage:
+  name: Synchronize usage
+  description: Synchronize utility observations with Home Assistant Recorder.
+  fields:
+    meter_id:
+      name: Meter ID
+      description: Energy Ingest meter identifier (electricity or gas).
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 1
+          step: 1
+          mode: box

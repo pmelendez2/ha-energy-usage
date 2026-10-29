@@ -7,7 +7,7 @@
 
 **Status:** Proposed for 0.1.1; not included in released 0.1.0
 
-**Release:** 0.1.1
+**Release:** 0.1.2
 
 **Last Updated:** 2026-10-26
 

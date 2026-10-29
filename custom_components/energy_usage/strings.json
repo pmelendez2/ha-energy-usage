@@ -58,5 +58,17 @@
         }
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Automatic synchronization",
+        "description": "Choose how often to check Energy Ingest for imported usage and accepted corrections. This does not download XML from the utility. Changes take effect when saved.",
+        "data": {
+          "sync_interval_hours": "Synchronization frequency",
+          "sync_on_startup": "Synchronize after Home Assistant starts"
+        }
+      }
+    }
   }
 }

@@ -7,7 +7,7 @@
 
 **Status:** Current documentation baseline
 
-**Release:** 0.1.1
+**Release:** 0.1.2
 
 **Last Updated:** 2026-10-27
 
