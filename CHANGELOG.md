@@ -5,7 +5,7 @@
 
 **Purpose:** Changelog reference for Energy Usage.
 
-**Status:** Release candidate
+**Status:** Published release history
 
 **Release:** 0.1.2
 
@@ -13,7 +13,11 @@
 
 ## Unreleased
 
-### In development for 0.1.2
+No changes recorded.
+
+## 0.1.2 — Correction-Safe Synchronization (2026-10-28)
+
+### Changed
 
 - Drain admitted scheduled and manual synchronization operations during
   configuration-entry unload before releasing shared meter locks.
@@ -22,13 +26,15 @@
 - Add regression tests for shutdown draining and transient API failures.
 - Preserve complete canonical Recorder read-back and correction safeguards.
 - Keep initial import separate from recurring correction-safe synchronization.
-- Update README, installation and developer verification guidance to reflect
-  the development implementation and its outstanding runtime acceptance.
-- Clarify that unload/reload, Recorder shutdown, API recovery and production
-  upgrade acceptance are not yet verified in live Home Assistant.
+- Update README, installation, and developer verification guidance for
+  the published release and outstanding runtime acceptance.
+- Document remaining live lifecycle, recovery, and upgrade acceptance
+  scenarios without claiming they have passed.
 
 
-### Planned for 0.1.1
+## 0.1.1 — Installation and Import UX (2026-10-27)
+
+### Added
 
 - One-click, per-meter initial import of complete verified historical data.
 - Automatic discovery of the meter's actual local-calendar coverage.
