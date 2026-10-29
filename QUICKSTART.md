@@ -20,7 +20,7 @@ integration; its database is not created by HACS.
 ## 1. Install from HACS
 
 1. In HACS, open **Custom repositories** from the three-dot menu.
-2. Add `https://github.com/pmelendez2/ha_energy_usage` as **Integration**.
+2. Add `https://github.com/pmelendez2/ha-energy-usage` as **Integration**.
    If it is already listed, do not add it again.
 3. Open **Energy Usage**, download the latest compatible **published** release,
    and restart Home Assistant.

@@ -59,7 +59,7 @@ install the Energy Ingest server.
 Before configuring Energy Usage in Home Assistant:
 
 1. Install **Energy Ingest** and initialize its MariaDB database using its
-   [production installation instructions](https://github.com/pmelendez2/energy_ingest).
+   [production installation instructions](https://github.com/pmelendez2/energy-ingest).
 2. Import actual electricity and/or natural gas usage into Energy Ingest.
    Confirm its physical meters and accepted usage are available. Simply
    creating an empty database is not sufficient.
@@ -124,7 +124,7 @@ See [Installation and configuration](INSTALLATION.md) for user setup,
 explicit initial import, Energy Dashboard, and the Explorer card.
 
 Versioned releases are published on the
-[GitHub Releases page](https://github.com/pmelendez2/ha_energy_usage/releases).
+[GitHub Releases page](https://github.com/pmelendez2/ha-energy-usage/releases).
 HACS custom-repository installation is distinct from default-catalog approval.
 
 ## Development and contributions

@@ -26,7 +26,7 @@ Default HACS catalog inclusion is a separate approval process.
 ## 1. Prerequisites
 
 1. **Install Energy Ingest and its MariaDB database first.** Follow the
-   [Energy Ingest deployment instructions](https://github.com/pmelendez2/energy_ingest)
+   [Energy Ingest deployment instructions](https://github.com/pmelendez2/energy-ingest)
    for your host. The Energy Usage integration does not create that database.
 2. **Import actual electricity or natural gas observations into Energy
    Ingest** before setting up Energy Usage in Home Assistant. An empty
@@ -127,7 +127,7 @@ Restart the Home Assistant instance, then refresh the browser.
 The HACS custom repository is:
 
 ```text
-https://github.com/pmelendez2/ha_energy_usage
+https://github.com/pmelendez2/ha-energy-usage
 ```
 
 1. Open **HACS** and its three-dot menu → **Custom repositories**.

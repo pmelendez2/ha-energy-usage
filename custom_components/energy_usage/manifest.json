@@ -4,9 +4,9 @@
   "codeowners": [],
   "config_flow": true,
   "dependencies": ["http", "recorder"],
-  "documentation": "https://github.com/pmelendez2/ha_energy_usage",
+  "documentation": "https://github.com/pmelendez2/ha-energy-usage",
   "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/pmelendez2/ha_energy_usage/issues",
+  "issue_tracker": "https://github.com/pmelendez2/ha-energy-usage/issues",
   "requirements": [],
   "version": "0.1.2"
 }
