@@ -5,11 +5,11 @@
 
 **Purpose:** Explain capabilities, prerequisites, and installation paths.
 
-**Status:** Published 0.1.0; 0.1.1 development
+**Status:** Published v0.1.2
 
 **Release:** 0.1.2
 
-**Last Updated:** 2026-10-23
+**Last Updated:** 2026-10-29
 
 **Energy Usage** (`ha_energy_usage`) is a community-developed Home Assistant
 custom integration that reads accepted electricity and natural gas consumption
@@ -77,8 +77,8 @@ have been validated.
 
 ## Get started
 
-For the shortest path, see [Installation](INSTALLATION.md). The installation guide describes the initial import workflow and the
-0.1.2 synchronization functionality currently undergoing validation.
+For the shortest path, see [Installation](INSTALLATION.md). The installation guide describes initial historical import and the
+published v0.1.2 correction-safe synchronization functionality.
 
 Follow **[INSTALLATION.md](INSTALLATION.md)** from start to finish for:
 
@@ -96,10 +96,11 @@ Follow **[INSTALLATION.md](INSTALLATION.md)** from start to finish for:
 ## Current limitations
 
 - **Initial import and synchronization are separate operations.** The initial
-  importer refuses to overwrite existing statistics. The 0.1.2 development
-  synchronization service can reconcile verified canonical usage and accepted
-  corrections, including on a configured schedule. It is not yet released or
-  validated for production use.
+  importer refuses to overwrite existing statistics. The v0.1.2
+  synchronization service reconciles verified canonical usage and
+  accepted corrections, including on a configured schedule. Normal
+  development runtime synchronization was verified; full live
+  failure-recovery and upgrade acceptance remains incomplete.
 - **Gas observations are daily.** An hourly gas graph must not invent readings.
 - Custom card controls and source compatibility must be tested against each
   supported Home Assistant release.

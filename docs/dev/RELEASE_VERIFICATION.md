@@ -13,7 +13,7 @@
 
 ## Local verification
 
-Run from the `ha_energy_usage` repository root:
+Run from the `ha-energy-usage` repository root:
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
@@ -38,7 +38,12 @@ Home Assistant runtime integration test.
 Test with a disposable Home Assistant instance, using the published
 Energy Ingest HTTP API and a development-only bearer token. Confirm
 successful setup, two meter devices, sensor state, failure/recovery,
-and reload/unload. Explicit initial Recorder imports have been runtime-validated. Automatic correction-safe synchronization is under development for 0.1.2.
+and reload/unload.
+
+Explicit initial Recorder imports have been runtime-validated. The v0.1.2
+release also passed normal scheduled and manual synchronization tests in
+development Home Assistant. These results do not establish completion of
+all lifecycle, failure-recovery, or upgrade acceptance scenarios.
 Verify that unload drains admitted synchronization work before runtime
 cleanup, that temporary API failures do not write statistics, and that
 subsequent cycles recover. Run these checks in disposable development HA;
@@ -53,7 +58,8 @@ repository; the component-only ZIP is an optional manual-install artifact.
 
 ## 0.1.2 lifecycle and recovery acceptance checklist
 
-Before release, use disposable Home Assistant and Energy Ingest environments:
+The following scenarios remain acceptance criteria. Use disposable
+Home Assistant and Energy Ingest environments:
 
 - Verify configured startup delay and periodic scheduling with both meters.
 - Start a synchronization, request config-entry unload, and verify that
@@ -68,4 +74,5 @@ Before release, use disposable Home Assistant and Energy Ingest environments:
 - Confirm INFO/DEBUG logs for normal events and ERROR logs for failures.
 
 These are acceptance requirements, not claims of completed live testing.
-Do not deploy this development implementation to production until verified.
+The published v0.1.2 release does not establish completion of every live
+failure-recovery or upgrade acceptance scenario.

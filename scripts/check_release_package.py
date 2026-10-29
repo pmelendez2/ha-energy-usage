@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
-"""Validate the exact release ZIP without unpacking it."""
+"""Validate a component-only release ZIP without unpacking it."""
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import zipfile
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
+ROOT = Path(__file__).resolve().parents[1]
 PREFIX = "custom_components/energy_usage/"
 REQUIRED = {
     PREFIX + "manifest.json",
@@ -23,7 +25,14 @@ REQUIRED = {
 }
 
 
-def check(path: str) -> None:
+def check(path: str, expected_version: str | None = None) -> None:
+    if expected_version is None:
+        expected_version = (ROOT / "release/VERSION").read_text(
+            encoding="utf-8"
+        ).strip()
+    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", expected_version):
+        raise ValueError("Invalid canonical release version")
+
     with zipfile.ZipFile(path) as archive:
         names = archive.namelist()
         assert len(names) == len(set(names)), "Duplicate members"
@@ -35,8 +44,12 @@ def check(path: str) -> None:
             assert "__pycache__" not in name and not name.endswith(".pyc")
         manifest = json.loads(archive.read(PREFIX + "manifest.json"))
         assert manifest["domain"] == "energy_usage"
-        assert manifest["version"]
-    print(f"Release ZIP: PASS ({len(names)} files)")
+        assert manifest["version"] == expected_version, (
+            "Release ZIP version mismatch: "
+            f"expected {expected_version}, found {manifest['version']}"
+        )
+    print(f"Release ZIP: PASS ({len(names)} files, "
+          f"version {expected_version})")
 
 
 if __name__ == "__main__":

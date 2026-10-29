@@ -9,7 +9,7 @@
 
 **Release:** 0.1.2
 
-**Last Updated:** 2026-10-23
+**Last Updated:** 2026-10-29
 
 ## Purpose
 
@@ -34,6 +34,8 @@ AI assisted in their discussion or drafting.
 | Release | AI Tool | Model | Date Range |
 |---|---|---|---|
 | 0.1.0 | ChatGPT | GPT-5.6 Sol, GPT-6 | 2026-09-28 - 2026-10-26 |
+| 0.1.1 | ChatGPT | GPT-6 | 2026-10-26 - 2026-10-27 |
+| 0.1.2 | ChatGPT | GPT-6 | 2026-10-27 - 2026-10-28 |
 
 ### 0.1.0 (published 2026-10-26)
 
@@ -70,6 +72,22 @@ appropriate, including:
 - upstream source repositories;
 - actual test results;
 - sanitized or synthetic regression fixtures.
+
+### 0.1.1 (2026-10-27)
+
+- **AI Tool:** ChatGPT / GPT-6
+- **Assistance:** Historical import UX, documentation, test review,
+  and release preparation.
+- **Verification:** Maintainer review and repository release checks.
+
+### 0.1.2 (published 2026-10-28)
+
+- **AI Tool:** ChatGPT / GPT-6
+- **Assistance:** Correction-safe synchronization, lifecycle handling,
+  regression testing, documentation, and release preparation.
+- **Verification:** Automated tests, CI, package checks, and normal
+  development Home Assistant synchronization. Some live recovery and
+  upgrade scenarios remain without conclusive acceptance evidence.
 
 #### Maintenance
 

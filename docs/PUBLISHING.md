@@ -9,9 +9,9 @@
 
 **Release:** 0.1.2
 
-**Last Updated:** 2026-10-23
+**Last Updated:** 2026-10-29
 
-`ha_energy_usage` is a custom integration, not part of Home Assistant Core.
+`ha-energy-usage` is a custom integration, not part of Home Assistant Core.
 
 1. Run local tests and GitHub Actions, including supported Home Assistant
    versions. Do not claim a version is tested without completing runtime tests.

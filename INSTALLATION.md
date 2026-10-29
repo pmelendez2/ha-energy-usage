@@ -9,11 +9,11 @@ path for upcoming 0.1.1 improvements. This document retains the detailed
 
 **Purpose:** Guide first-time installation and usage-history import.
 
-**Status:** Published 0.1.0; guided workflow proposed for 0.1.1
+**Status:** Published v0.1.2
 
 **Release:** 0.1.2
 
-**Last Updated:** 2026-10-23
+**Last Updated:** 2026-10-29
 
 This guide installs **Energy Usage** as a Home Assistant **custom integration**,
 imports initial electricity and gas history, configures the built-in Energy
@@ -346,10 +346,12 @@ Check all of the following before considering installation complete:
 
 ## 11. Important operational limits
 
-The released initial-import workflow is distinct from the **0.1.2 development**
+The initial-import workflow is distinct from the published **v0.1.2**
 correction-safe synchronization service. The latter supports manual and
 scheduled reconciliation of verified canonical electricity and natural-gas
-usage, including accepted corrections, but is **not yet production-validated**.
+usage, including accepted corrections. Normal development runtime
+synchronization passed verification, but complete live failure-recovery
+and upgrade acceptance remains outstanding.
 During configuration-entry unload, scheduling stops and admitted operations
 are drained before their shared runtime is discarded. An API failure must
 not be interpreted as a successful synchronization; the next cycle may retry.

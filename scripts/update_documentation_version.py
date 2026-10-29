@@ -16,6 +16,10 @@ SKIP = {".git", ".venv", ".pytest_cache", "node_modules",
         "build", "dist"}
 RELEASE_LINE = re.compile(r"(?m)^(\*\*Release:\*\* )([^\r\n]+)$")
 PROJECT_VERSION = re.compile(r'(?m)^(version\s*=\s*")([^"]+)(")$')
+VERSION_PATTERN = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+")
+MANIFEST_VERSION = re.compile(
+    r'("version"\s*:\s*")[^"]+("(?=\s*[,}]))'
+)
 
 
 def documents(root: Path):
@@ -23,41 +27,36 @@ def documents(root: Path):
                   if not (set(p.relative_to(root).parts) & SKIP))
 
 
-def synchronize(root: Path, version: str, *, check: bool) -> list[str]:
-    """Return discrepancies; modify only current release metadata if requested."""
-    errors = []
+def plan(root: Path, version: str) -> tuple[dict[Path, str], list[str]]:
+    """Compute every replacement before permitting any file writes."""
+    if not VERSION_PATTERN.fullmatch(version):
+        raise ValueError("Expected semantic version such as 0.1.2")
+    updates: dict[Path, str] = {}
+    errors: list[str] = []
     for path in documents(root):
         source = path.read_text(encoding="utf-8")
         matches = list(RELEASE_LINE.finditer(source))
         if len(matches) != 1:
             errors.append(f"{path.relative_to(root)}: expected one Release field")
             continue
-        if matches[0].group(2).strip() == version:
-            continue
-        errors.append(f"{path.relative_to(root)}: release mismatch")
-        if not check:
-            updated = RELEASE_LINE.sub(lambda m: m.group(1) + version,
-                                       source, count=1)
-            path.write_text(updated, encoding="utf-8")
+        if matches[0].group(2).strip() != version:
+            errors.append(f"{path.relative_to(root)}: release mismatch")
+            updates[path] = RELEASE_LINE.sub(
+                lambda m: m.group(1) + version, source, count=1
+            )
 
     manifest = root / "custom_components/energy_usage/manifest.json"
-    data = json.loads(manifest.read_text(encoding="utf-8"))
-    if data.get("version") != version:
+    source = manifest.read_text(encoding="utf-8")
+    data = json.loads(source)
+    matches = list(MANIFEST_VERSION.finditer(source))
+    if len(matches) != 1:
+        errors.append("manifest.json: expected one version field")
+    elif data.get("version") != version:
         errors.append("manifest.json: version mismatch")
-        if not check:
-            data["version"] = version
-            # Preserve formatting and key ordering of the existing manifest.
-            source = manifest.read_text(encoding="utf-8")
-            source, n = re.subn(
-                r'("version"\s*:\s*")[^"]+(" )',
-                lambda m: m.group(1) + version + m.group(2), source)
-            if not n:
-                source, n = re.subn(
-                    r'("version"\s*:\s*")[^"]+("(?=\s*[,}]))',
-                    lambda m: m.group(1) + version + m.group(2), source)
-            if n != 1:
-                raise ValueError("Unexpected manifest version format")
-            manifest.write_text(source, encoding="utf-8")
+        updates[manifest] = MANIFEST_VERSION.sub(
+            lambda m: m.group(1) + version + m.group(2),
+            source, count=1
+        )
 
     project = root / "pyproject.toml"
     source = project.read_text(encoding="utf-8")
@@ -66,10 +65,22 @@ def synchronize(root: Path, version: str, *, check: bool) -> list[str]:
         errors.append("pyproject.toml: expected one project version")
     elif matches[0].group(2) != version:
         errors.append("pyproject.toml: version mismatch")
-        if not check:
-            project.write_text(PROJECT_VERSION.sub(
-                lambda m: m.group(1) + version + m.group(3),
-                source, count=1), encoding="utf-8")
+        updates[project] = PROJECT_VERSION.sub(
+            lambda m: m.group(1) + version + m.group(3),
+            source, count=1
+        )
+    return updates, errors
+
+
+def synchronize(root: Path, version: str, *, check: bool) -> list[str]:
+    """Check or apply metadata; reject malformed files before writing."""
+    updates, errors = plan(root, version)
+    if not check:
+        if len(errors) != len(updates):
+            raise ValueError("Invalid metadata; no files were modified: "
+                             + "; ".join(errors))
+        for path, content in updates.items():
+            path.write_text(content, encoding="utf-8")
     return errors
 
 
@@ -80,16 +91,27 @@ def main():
     args = parser.parse_args()
     if args.check and args.new_version:
         parser.error("--check and --set are mutually exclusive")
-    version = (args.new_version or VERSION_FILE.read_text().strip())
-    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+    version = args.new_version or VERSION_FILE.read_text().strip()
+    if not VERSION_PATTERN.fullmatch(version):
         parser.error("Expected semantic version such as 0.1.2")
-    if args.new_version:
-        VERSION_FILE.write_text(version + "\n", encoding="utf-8")
-    errors = synchronize(ROOT, version, check=args.check)
-    if args.check and errors:
-        print("\n".join(errors))
-        raise SystemExit(f"Release metadata: FAIL ({len(errors)} issues)")
-    print(f"Release metadata: PASS ({version}, {len(errors)} updated)")
+    updates, errors = plan(ROOT, version)
+    if args.check:
+        if errors:
+            print("\n".join(errors))
+            raise SystemExit(
+                f"Release metadata: FAIL ({len(errors)} issues)"
+            )
+    else:
+        if len(errors) != len(updates):
+            raise SystemExit("Release metadata: FAIL (invalid file format; "
+                             "nothing changed): " + "; ".join(errors))
+        # All metadata is validated before changing the canonical version.
+        for path, content in updates.items():
+            path.write_text(content, encoding="utf-8")
+        if args.new_version:
+            VERSION_FILE.write_text(version + "\n", encoding="utf-8")
+    print(f"Release metadata: PASS ({version}, "
+          f"{0 if args.check else len(updates)} updated)")
 
 
 if __name__ == "__main__":

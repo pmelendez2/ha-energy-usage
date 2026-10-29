@@ -5,11 +5,11 @@
 
 **Purpose:** Track external HACS catalog requirements and evidence
 
-**Status:** Submission preparation; not yet catalog-approved
+**Status:** PR #12817 open; awaiting maintainer review
 
 **Release:** 0.1.2
 
-**Last Updated:** 2026-10-26
+**Last Updated:** 2026-10-29
 
 Installing through a custom HACS repository is already validated; being
 listed in the **default HACS catalog** requires external review. This is
@@ -32,10 +32,11 @@ not Home Assistant Core inclusion or an official Home Assistant endorsement.
   HACS documentation still references `home-assistant/brands`, while
   newer submission checks may accept locally bundled branding.
   If the check requires a Brands submission, complete that separately.
-- [ ] Publish any pending UX improvements as a reviewed versioned release.
-- [ ] Submit `pmelendez2/ha_energy_usage` to `hacs/default` via an editable
-  pull request from the repository owner's personal fork/branch.
-- [ ] Wait for all default-catalog PR checks and maintainer approval.
+- [x] Publish the v0.1.2 correction-safe synchronization release.
+- [x] Submit `pmelendez2/ha-energy-usage` to `hacs/default` through
+  [PR #12817](https://github.com/hacs/default/pull/12817).
+- [x] All 13 PR validation checks passed on 2026-10-28.
+- [ ] Await HACS maintainer review and approval.
 - [ ] Confirm the integration appears after the HACS catalog scan.
 
 ## Submission references
