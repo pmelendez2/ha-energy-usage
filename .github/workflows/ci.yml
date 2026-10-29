@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: '3.13'
       - name: Install test dependencies
-        run: python -m pip install aiohttp
+        run: python -m pip install aiohttp PyYAML
       - name: Validate Explorer JavaScript
         run: |
           node --check \

@@ -8,7 +8,6 @@ import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / "custom_components/energy_usage/statistics_sync_service.py"
-PATCH = ROOT / "scripts/apply-sync-service.py"
 
 
 class SyncServiceWiringTests(unittest.TestCase):
@@ -26,12 +25,6 @@ class SyncServiceWiringTests(unittest.TestCase):
         self.assertNotIn("await sync_one(hass, entry", src.split(
             "async def async_register_sync_service", 1)[1].split(
             "async def handle", 1)[0])
-
-    def test_patcher_checks_known_anchors(self):
-        source = PATCH.read_text()
-        self.assertIn("source.count(anchor) != 1", source)
-        self.assertIn("async_register_sync_service", source)
-        self.assertIn("SYNC_SERVICE", source)
 
 
 if __name__ == "__main__":

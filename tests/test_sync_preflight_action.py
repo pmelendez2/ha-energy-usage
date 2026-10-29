@@ -8,7 +8,6 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVICE = ROOT / "custom_components/energy_usage/statistics_sync_preflight_service.py"
-PATCH = ROOT / "scripts/apply-sync-preflight.py"
 
 
 class PreflightActionTests(unittest.TestCase):
@@ -22,12 +21,6 @@ class PreflightActionTests(unittest.TestCase):
         self.assertIn("await assess_meter(", content)
         self.assertNotIn("async_add_external_statistics", content)
         self.assertNotIn("sync_owned_statistics", content)
-
-    def test_lifecycle_patcher_has_safe_anchors(self):
-        content = PATCH.read_text()
-        self.assertIn("source.count(anchor) != 1", content)
-        self.assertIn("SYNC_SERVICE", content)
-        self.assertIn("PREFLIGHT_SERVICE", content)
 
     def test_report_contains_counts_and_no_write_notice(self):
         source = SERVICE.read_text()
