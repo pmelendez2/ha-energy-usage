@@ -28,6 +28,6 @@
 - Keep decisions under `docs/adr/`; preserve decision dates and identifiers.
 - Use working relative Markdown links and prefer audience-appropriate targets.
 - Retain historical release entries; current metadata identifies the baseline.
-- Align terminology with [Terminology](TERMINOLOGY.md) and UI localization
+- Align terminology with [Terminology](../TERMINOLOGY.md) and UI localization
   policy with [Internationalization](I18N.md).
 - Run `python3 scripts/check_documentation.py` before each release.

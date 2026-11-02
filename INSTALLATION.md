@@ -64,8 +64,7 @@ These commands assume the standard production bundle under
 ### Copy the bearer token
 
 The Energy Ingest production installer stores the **Home Assistant-specific
-API token** in an owner-readable secret file. For the deployed production
-bundle tested on `piha`, its exact path is:
+API token** in an owner-readable secret file. For the standard production bundle, the token file is:
 
 ```text
 $HOME/energy-ingest-prod/deploy/docker-compose/prod-secrets/ha_energy_dev_api_token
@@ -197,7 +196,7 @@ dates, service YAML, or separate API calls are needed.
 
 ### Manual action for released 0.1.0
 
-Open **Developer tools / Settings → Tools → Actions** (wording depends on your
+Open **Tools → Actions** (wording depends on your
 Home Assistant version). Select the action
 `energy_usage.import_historical_usage`. Provide the fields below.
 
@@ -232,7 +231,7 @@ Do not delete an existing series or rerun an initial import casually.
 
 ## 6. Verify Recorder statistics
 
-Open **Developer tools / Settings → Tools → Statistics** and find your imported
+Open **Tools → Statistics** and find your imported
 meter statistics. The default IDs follow the convention:
 
 ```text

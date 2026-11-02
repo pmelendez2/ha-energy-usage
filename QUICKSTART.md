@@ -67,7 +67,7 @@ the present month may be empty when the utility data ends earlier.
 Under **Settings → Dashboards → Resources**, add this JavaScript module:
 
 ```text
-/energy_usage/energy-usage-explorer.js?v=0.1.1
+/energy-usage/energy-usage-explorer.js
 ```
 
 In an editable dashboard, add a **Manual** card:
@@ -82,3 +82,51 @@ daily, not hourly. Missing periods remain missing; no billing is calculated.
 
 For advanced installation, source validation, and manual troubleshooting,
 see [Installation](INSTALLATION.md).
+
+## Updating utility data (development preview)
+
+The utility upload card is not included in the published v0.1.2 release.
+For development validation, add `/energy-usage/energy-usage-utility-card.js`
+as a JavaScript module under **Settings → Dashboards → Resources**.
+Add **Custom: Energy Usage Utility Card** to a development dashboard.
+Use the visual card editor to enter the utility's HTTPS download website.
+The preferred Utility Company ID is optional. If your Home Assistant
+version does not show the visual editor, use **Show code editor**:
+
+```yaml
+type: custom:energy-usage-utility-card
+# Optional: use the actual HTTPS utility download page.
+# utility_url: https://your-utility.example/
+# source_id is optional; choose an utility company in the card.
+```
+
+The card does not require a utility website URL to load. If configured,
+the link opens that website in a separate browser tab. The URL is not
+the Energy Ingest API address; configure that connection through the
+Energy Usage integration instead. A failed utility-company request
+shows a diagnostic status and does not enable imports. The card
+retrieves utility companys from Energy Ingest and displays their names.
+Choose the correct source for the selected XML batch. Sign in
+at the utility website yourself, download actual Green Button XML, choose
+the electricity and/or gas files, then select **Import and synchronize**.
+Inspect each import result and confirm Recorder synchronization separately.
+No utility passwords or API tokens belong in card configuration.
+
+## Selecting utility XML files (development preview)
+
+The utility dashboard card offers **Choose Files** and **Choose Folder**.
+You can use either or both; selections are combined, and repeated files
+are not added twice. Your browser asks permission to read the selected files; the
+integration cannot set or remember your computer's Downloads directory.
+Review the discovered XML files. Files are checked by default;
+**Select all** is useful after unchecking some files, while **Clear
+selection** unchecks all files without removing them from the list.
+The **Import and synchronize** button remains disabled until a utility
+company loads successfully and at least one file is checked. Only `.xml` files are shown.
+
+The card requires an utility company selected from the backend catalog.
+A batch must contain only XML files from that source; do not mix sources.
+Uploads require a Home Assistant administrator account. If canonical import
+succeeds but Recorder synchronization fails, use **Retry Recorder
+synchronization** without uploading the XML again. This remains a development
+preview until authorization and end-to-end runtime testing are complete.

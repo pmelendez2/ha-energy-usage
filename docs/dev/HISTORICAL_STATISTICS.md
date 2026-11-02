@@ -64,7 +64,7 @@ with another initial-import request.
 `async_add_external_statistics` submits a job to Recorder's asynchronous
 queue. Submission is not proof that data was committed. Verify the
 stored statistic in Home Assistant's Statistics tools before declaring
-the import complete. The v0.1.1 import guard blocks another submission
+the import complete. The import guard blocks another submission
 while a previous one could still be pending. A safe retry after a failed
 queued write requires confirmation that no history persisted and a Home
 Assistant restart to clear the old in-process queue. Never delete
@@ -72,7 +72,7 @@ existing statistics to make the first-time importer run again.
 
 ## Development verification
 
-Run from the `ha_energy_usage` repository root:
+Run from the `ha-energy-usage` repository root:
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_history.py' -v
@@ -123,3 +123,17 @@ and tested. This does not prohibit the guarded initial import:
   and how write completion and interruption recovery are verified.
 - Source-cadence support and coverage checks for 15-minute intervals; test
   incomplete hours and daylight-saving transitions.
+
+## Utility XML upload and reconciliation (development)
+
+Home Assistant exposes an authenticated XML upload endpoint at
+`POST /api/energy_usage/utility_upload?source_id=<ID>&sync=1`.
+The endpoint forwards a single bounded Green Button XML document (8 MiB
+maximum) to Energy Ingest using the configured API token. The source ID
+identifies an acquisition source, not a physical meter. The XML is not
+persisted by the Home Assistant view. Canonical import commits before
+Recorder synchronization, so a failed synchronization is separately
+retryable and must never be reported as a failed canonical import.
+The dashboard card is an unreleased development preview. Do not expose the
+endpoint through an unauthenticated proxy or deploy without runtime and
+security verification, including source authorization and multi-file behavior.

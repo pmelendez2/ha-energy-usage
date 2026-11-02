@@ -70,3 +70,22 @@ Before adding a row marked *Tested*, record the following:
 Record detailed cases in [Test Plan](TEST_PLAN.md) and
 [Test Strategy](TEST_STRATEGY.md). For maintainer release steps, see
 [Release Verification](../dev/RELEASE_VERIFICATION.md).
+
+## Utility upload runtime validation still required
+
+The XML upload endpoint and dashboard card have passed source-level tests,
+but the browser file-picker, authenticated upload, acquisition source
+validation, multiple-file behavior, import corrections, and Recorder retry
+behavior have not yet been verified end-to-end in a running development
+Home Assistant instance. Production deployment is not approved on these
+results alone.
+
+## Acquisition-source discovery and upload security (development)
+
+The source catalog, administrator-only Home Assistant proxy, bounded request
+reading, and retry-only Recorder action have automated contract coverage.
+These checks do not establish per-source authorization within Energy Ingest:
+its bearer token currently grants the same API permissions for all configured
+sources. Before production release, test source-to-document association,
+backend authorization boundaries, file/folder selection, and partial failures
+using isolated databases and a real Home Assistant browser session.

@@ -28,7 +28,7 @@ Local images under `custom_components/energy_usage/brand/` are included in
 the repository. The icon was approved by the maintainer before the v0.1.0
 public release. HACS default-catalog acceptance is a separate review.
 
-The maintainer's [HACS submission checklist](dev/HACS_SUBMISSION.md)
+The maintainer's [HACS submission checklist](HACS_SUBMISSION.md)
 tracks the external application and outstanding checks.
 
 **Version 0.1.0 limitations:** Explicit initial Recorder import is supported

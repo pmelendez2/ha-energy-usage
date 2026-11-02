@@ -53,6 +53,19 @@ class EnergyApi:
                 "Cannot communicate with Energy Ingest"
             ) from exc
 
+    async def acquisition_sources(self):
+        """Return configured source IDs and display names."""
+        data = await self._get("/v1/acquisition-sources")
+        if not isinstance(data, list) or any(
+            not isinstance(item, dict)
+            or type(item.get("id")) is not int
+            or item["id"] <= 0
+            or not isinstance(item.get("name"), str)
+            for item in data
+        ):
+            raise EnergyApiError("Invalid acquisition sources")
+        return data
+
     async def meters(self):
         data = await self._get("/v1/meters")
         if not isinstance(data, list):
@@ -94,3 +107,97 @@ class EnergyApi:
         if not isinstance(data, dict):
             raise EnergyApiError("Unexpected stream response")
         return data
+
+    async def associate_resource(self, meter_id: int, resource_id: int):
+        """Attach an imported reading resource to a selected physical meter."""
+        if type(meter_id) is not int or meter_id <= 0:
+            raise ValueError("Invalid physical meter ID")
+        if type(resource_id) is not int or resource_id <= 0:
+            raise ValueError("Invalid reading resource ID")
+        try:
+            async with self._session.post(
+                self._url + f"/v1/meters/{meter_id}/resources",
+                json={"resource_id": resource_id},
+                headers={
+                    "Authorization": f"Bearer {self._token}",
+                },
+                timeout=ClientTimeout(total=30),
+            ) as response:
+                if response.status in (401, 403):
+                    raise EnergyAuthError("Authentication failed")
+                if response.status == 409:
+                    raise EnergyApiError(
+                        "Reading resource does not match this meter "
+                        "or is already assigned elsewhere"
+                    )
+                if response.status != 200:
+                    raise EnergyApiError(
+                        "Meter association returned HTTP "
+                        f"{response.status}"
+                    )
+                result = await response.json(content_type=None)
+        except EnergyApiError:
+            raise
+        except (ClientError, TimeoutError, ValueError) as exc:
+            raise EnergyApiError("Meter association failed") from exc
+        if (
+            not isinstance(result, dict)
+            or result.get("meter_id") != meter_id
+            or result.get("resource_id") != resource_id
+            or result.get("status") not in (
+                "associated", "already_associated"
+            )
+        ):
+            raise EnergyApiError("Invalid meter association response")
+        return result
+
+    async def import_green_button(self, source_id: int, xml: bytes):
+        """Import one XML document using the authenticated backend API.
+
+        The source ID is an acquisition source, not a meter identifier.
+        The backend alone decides which observations are accepted.
+        """
+        if type(source_id) is not int or source_id <= 0:
+            raise ValueError("Invalid acquisition source ID")
+        if not isinstance(xml, bytes) or not xml:
+            raise ValueError("Expected nonempty XML bytes")
+        if len(xml) > 8 * 1024 * 1024:
+            raise ValueError("XML exceeds the 8 MiB upload limit")
+        try:
+            async with self._session.post(
+                self._url + "/v1/imports/green-button?" +
+                urlencode({"source_id": source_id}),
+                data=xml,
+                headers={
+                    "Authorization": f"Bearer {self._token}",
+                    "Content-Type": "application/xml",
+                },
+                timeout=ClientTimeout(total=120),
+            ) as response:
+                if response.status in (401, 403):
+                    raise EnergyAuthError("Authentication failed")
+                if response.status != 200:
+                    raise EnergyApiError(
+                        f"Energy Ingest import returned HTTP {response.status}"
+                    )
+                result = await response.json(content_type=None)
+        except EnergyApiError:
+            raise
+        except (ClientError, TimeoutError, ValueError) as exc:
+            raise EnergyApiError("Energy Ingest import failed") from exc
+        if not isinstance(result, dict) or any(
+            type(result.get(key)) is not int or result[key] < 0
+            for key in ("observations", "unchanged", "accepted")
+        ):
+            raise EnergyApiError("Invalid Energy Ingest import result")
+        resource_ids = result.get("resource_ids")
+        if (
+            not isinstance(resource_ids, list)
+            or any(
+                type(resource_id) is not int or resource_id <= 0
+                for resource_id in resource_ids
+            )
+            or len(set(resource_ids)) != len(resource_ids)
+        ):
+            raise EnergyApiError("Invalid imported reading resource IDs")
+        return result
