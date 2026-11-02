@@ -89,6 +89,15 @@ for path in files:
         errors.append(f'{path.relative_to(ROOT)}: outdated menu: '
                       f'{match.group(0)}')
 
+# Documentation describes only the current Home Assistant integration
+# release. Do not mistake Home Assistant Core or Energy Ingest versions for
+# this package's release; restrict the check to older 0.1.x references.
+OLD_RELEASE = re.compile(r'(?<![\d.])v?0\.1\.(?:0|1)(?!\d)')
+for path in files:
+    for match in OLD_RELEASE.finditer(path.read_text(encoding='utf-8')):
+        errors.append(f'{path.relative_to(ROOT)}: obsolete release: '
+                      f'{match.group(0)}')
+
 if errors:
     print('\n'.join(errors))
     raise SystemExit(f'Documentation: FAIL ({len(errors)} issues)')

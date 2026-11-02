@@ -5,7 +5,7 @@
 
 **Purpose:** Resolve common installation and history-import errors
 
-**Status:** Proposed for 0.1.1
+**Status:** Published v0.1.2 guidance
 
 **Release:** 0.1.2
 
@@ -25,7 +25,7 @@
 | A button was pressed but success or failure is unclear | Open the Electric or Gas device's **Diagnostic** section. | **Historical import status** reports persisted data. **Last import attempt** reports the latest in-session operation; **Last import error** explains a failure. A failed repeat press can coexist with previously **Imported** data. The last-attempt details reset when Home Assistant restarts. |
 | Import says the earlier request is still unconfirmed | Do not queue another import yet. | Check **Tools → Statistics** and the Recorder logs. If the import never persisted, restart Home Assistant to clear any outstanding in-process Recorder jobs. Confirm the statistic still has no rows before pressing the import button again. Never restart solely because the UI is slow. |
 | Import exceeds 441 days | Stop at the current full-import limit. | Verify coverage with `analyze-prod-data.sh`. The initial importer cannot safely import that complete span; do not shorten it merely to make the first import succeed. |
-| Import action says “Unknown error” but graphs exist | Determine whether data was already imported. | Open **Tools → Statistics** and inspect both series. A second v0.1.0 initial import returns an error when history already exists. |
+| Import action says “Unknown error” but graphs exist | Determine whether data was already imported. | Open **Tools → Statistics** and inspect both series. Repeating an initial import returns an error when history already exists. |
 | Energy Dashboard shows nothing today | Choose a period with imported data. | In the Energy Dashboard date picker, select a month within the coverage reported by `analyze-prod-data.sh`. Confirm **Settings → Dashboards → Energy** uses the correct electricity and gas statistics. |
 | Gas is displayed in kWh | Check the original statistic unit. | In **Tools → Statistics**, verify that the gas series is in `thm`. Home Assistant can convert gas energy to kWh for display. |
 | Explorer reports an unknown card | Check the JavaScript resource. | Under **Settings → Dashboards → Resources**, add `/energy-usage/energy-usage-explorer.js?v=0.1.2` as a **JavaScript module**, save, and refresh. Match the query version to the installed integration. |

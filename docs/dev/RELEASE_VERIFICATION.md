@@ -69,7 +69,7 @@ Home Assistant and Energy Ingest environments:
   are written and a later scheduled cycle recovers without fabricated data.
 - Verify an accepted source correction updates the full cumulative series.
 - Restart and reload repeatedly; check for duplicate listeners or stale locks.
-- Upgrade an existing 0.1.1 development installation in place, preserving
+- Upgrade an existing installation to v0.1.2 in place, preserving
   configuration, credentials, and historical Recorder statistics.
 - Confirm INFO/DEBUG logs for normal events and ERROR logs for failures.
 

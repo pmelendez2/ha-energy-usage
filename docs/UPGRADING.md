@@ -11,8 +11,8 @@
 
 **Last Updated:** 2026-10-29
 
-This guide covers upgrading an existing installation, including **0.1.0 to
-0.1.2**. For a first installation, use [INSTALLATION.md](../INSTALLATION.md).
+This guide covers upgrading an existing installation to **v0.1.2**.
+For a first installation, use [INSTALLATION.md](../INSTALLATION.md).
 
 ## Before upgrading
 

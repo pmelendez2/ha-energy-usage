@@ -19,7 +19,7 @@ The `custom_components/energy_usage/history.py` module normalizes
 resolved observations from Energy Ingest without writing to Recorder.
 The separately invoked initial-import service may enqueue validated
 electricity and gas history into a previously empty statistic series.
-That initial import was released in v0.1.0; it cannot append, replace,
+The initial import in v0.1.2 cannot append, replace,
 or correct already-imported history. Automatic correction-safe
 synchronization remains a separate, unimplemented capability.
 

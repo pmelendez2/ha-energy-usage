@@ -1,9 +1,8 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Install and configure Energy Usage for Home Assistant
 
-**Start here:** [Installation](INSTALLATION.md) is the complete installation
-path for upcoming 0.1.1 improvements. This document retains the detailed
-0.1.0 manual instructions and advanced validation procedures.
+**Start here:** This guide covers the published v0.1.2 installation,
+including guided initial import and advanced validation procedures.
 
 **Audience:** Users and administrators
 
@@ -19,8 +18,8 @@ This guide installs **Energy Usage** as a Home Assistant **custom integration**,
 imports initial electricity and gas history, configures the built-in Energy
 Dashboard, and optionally installs the Energy Usage Explorer custom card.
 
-**Published release:** 0.1.0 is available on GitHub Releases.
-The guided import buttons are proposed for unreleased 0.1.1.
+**Published release:** v0.1.2 is available on GitHub Releases.
+The utility upload card is a development preview, not a released feature.
 Default HACS catalog inclusion is a separate approval process.
 
 ## 1. Prerequisites
@@ -169,11 +168,11 @@ the expected meters and coverage appear. If desired, the analysis script's
 "$HOME/energy-ingest-prod/scripts/analyze-prod-data.sh" --details
 ```
 
-The guided **0.1.1 import button** then validates the actual accepted API
+The guided import button validates the actual accepted API
 stream (`resolved: true`, `issues: []`) itself and refuses to import if the
 source is unresolved. Users do not need to construct API calls or expose
-their token for this validation. In **0.1.0**, the manual import action also
-checks the accepted observations and refuses invalid or unresolved data.
+their token for this validation. The manual import action also checks
+accepted observations and refuses invalid or unresolved data.
 
 Electricity source cadence is normally **hourly**. Natural gas source cadence
 is normally **daily**. A reported zero reading is actual data. An absent
@@ -185,7 +184,7 @@ reading is missing data and must **not** be replaced with zero.
 replace existing statistics. Do not import a short sample period first.
 Do not delete good history in order to repeat the initial import.
 
-### Recommended for 0.1.1 and later
+### Recommended guided import
 
 Open **Settings → Devices & services → Energy Usage**, select each physical
 meter device, and press **Import complete history (once)**. The button
@@ -194,7 +193,7 @@ date range, and queues the initial Recorder statistics. It will report
 existing history as a validation error rather than overwriting it. No IDs,
 dates, service YAML, or separate API calls are needed.
 
-### Manual action for released 0.1.0
+### Optional manual import action
 
 Open **Tools → Actions** (wording depends on your
 Home Assistant version). Select the action
@@ -297,10 +296,9 @@ After installing Energy Usage and restarting Home Assistant:
 
 1. Open **Settings → Dashboards**.
 2. Open the three-dot menu and select **Resources**.
-3. Add the resource URL matching your installed version. For released
-   v0.1.0, use:
+3. Add the resource URL matching the published integration version:
 
-   `/energy_usage/energy-usage-explorer.js?v=0.1.0`
+   `/energy_usage/energy-usage-explorer.js?v=0.1.2`
 
 4. Select **JavaScript module** as the resource type.
 5. Save the resource and reload the dashboard.
@@ -309,7 +307,7 @@ The JavaScript file is served directly by the Energy Usage integration from `cus
 
 #### Verify the installation
 
-Open `/energy_usage/energy-usage-explorer.js?v=0.1.0` on your Home Assistant server. It should return HTTP 200.
+Open `/energy_usage/energy-usage-explorer.js?v=0.1.2` on your Home Assistant server. It should return HTTP 200.
 
 In the Explorer dashboard, verify that the hourly bar chart, line chart, date navigation, calculation controls, and selected-data-point details are available.
 
@@ -338,7 +336,7 @@ Check all of the following before considering installation complete:
 | Import reports statistics already exist | Initial-import-only mode; do not retry or overwrite an existing series |
 | Gas missing in Energy Dashboard dropdown | Recorder unit should be `thm` with compatible energy metadata, not plain `therm` with an untyped unit class |
 | Dashboard empty today | Select a date/month **within imported history** |
-| Custom element not found | Confirm `/energy_usage/energy-usage-explorer.js?v=0.1.0` returns HTTP 200. Verify the resource type is JavaScript module, and reload the dashboard. |
+| Custom element not found | Confirm `/energy_usage/energy-usage-explorer.js?v=0.1.2` returns HTTP 200. Verify the resource type is JavaScript module, and reload the dashboard. |
 | Gas hourly chart unavailable | Expected: source gas observations are daily; no hourly values are fabricated |
 | Partial month labeled as month | Treat totals as **selected observations only**; inspect selection range and coverage |
 | Unexpected zero readings | Compare accepted Energy Ingest values before assuming zeros were generated |

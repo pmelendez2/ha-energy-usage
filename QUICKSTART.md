@@ -5,7 +5,7 @@
 
 **Purpose:** Install and display electricity and gas usage simply.
 
-**Status:** Proposed for 0.1.1; not included in released 0.1.0
+**Status:** Published v0.1.2; utility upload preview in development
 
 **Release:** 0.1.2
 
@@ -38,7 +38,7 @@ only its value into the **API bearer token** field. Home Assistant should discov
 your electricity and gas meters. The URL must be reachable from the Home
 Assistant container; `localhost` usually refers to the wrong container.
 
-## 3. Import your complete history (0.1.1 and later)
+## 3. Import your complete history
 
 Open each device in **Settings → Devices & services → Energy Usage**.
 Press **Import complete history (once)** for electricity and for gas.
@@ -51,9 +51,6 @@ YAML are needed. Existing Recorder statistics are never overwritten.
 supports at most 441 calendar days. It cannot append new observations or
 correct older ones. If data already exists, stop; do not delete it. If the
 import fails, see [Troubleshooting](docs/TROUBLESHOOTING.md).
-
-For released **0.1.0**, use the explicit one-time action documented in
-[Installation](INSTALLATION.md); the import buttons are not in that version.
 
 ## 4. Select the statistics in the Energy Dashboard
 

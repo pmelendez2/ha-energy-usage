@@ -21,7 +21,7 @@ not Home Assistant Core inclusion or an official Home Assistant endorsement.
   `custom_components/energy_usage`.
 - [x] `hacs.json` supplies the display name and renders `README.md`.
 - [x] `manifest.json` provides the required integration metadata.
-- [x] Signed `v0.1.0` tag and full GitHub Release published.
+- [x] Signed release tag and full GitHub Release published.
 - [x] HACS Action and hassfest passed on the release pull request.
 - [x] Production custom-repository install and runtime graphs verified
   on `piha`, 2026-10-26.

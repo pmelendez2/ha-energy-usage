@@ -25,15 +25,16 @@
    its validation, documentation, and branding requirements.
 
 Local images under `custom_components/energy_usage/brand/` are included in
-the repository. The icon was approved by the maintainer before the v0.1.0
-public release. HACS default-catalog acceptance is a separate review.
+the repository. The icon was approved by the maintainer before public
+release. HACS default-catalog acceptance is a separate review.
 
 The maintainer's [HACS submission checklist](HACS_SUBMISSION.md)
 tracks the external application and outstanding checks.
 
-**Version 0.1.0 limitations:** Explicit initial Recorder import is supported
-for previously empty statistic series. Automatic incremental updates,
-revision-aware corrections, and solar production/export ingestion are not.
+**Version 0.1.2 limitations:** Explicit initial Recorder import is supported
+for previously empty statistic series. Correction-safe synchronization is
+available, while full lifecycle and failure-recovery runtime acceptance
+remains outstanding. Solar production/export ingestion is out of scope.
 
 ## Release gates
 
