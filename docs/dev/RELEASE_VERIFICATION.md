@@ -124,3 +124,36 @@ original test XML privately; never attach credentials or customer XML.
 
 All cases require recorded pass/fail evidence before calling ADR-0003 runtime
 accepted or deploying the development upload workflow to production.
+
+## ADR-0003 release interoperability verification
+
+The guided utility import and physical meter synchronization workflow
+was verified against Energy Ingest 0.1.9-rc.3 on November 3, 2026.
+
+Verification results:
+
+- Per-file XML import status: PASS.
+- Previously imported XML detection: PASS.
+- New and updated electricity and natural gas readings: PASS.
+- Automatic synchronization of known physical meters: PASS.
+- Explicit confirmation of unfamiliar meter associations: PASS.
+- Interrupted-workflow recovery regression tests: PASS.
+- November 1, 2026 daylight-saving transition: PASS.
+- Recorder synchronization: PASS.
+- Duplicate Recorder timestamps: 0.
+- Electricity Recorder readings: 10,129.
+- Natural gas Recorder readings: 422.
+- Python regression tests: 263 passed.
+- JavaScript import-summary regression tests: PASS.
+- HACS, Hassfest, isolated CI, and Python compatibility: PASS.
+
+Energy Ingest 0.1.9 is the verified interoperability baseline
+for this release. The workflow depends on the backend's
+`already_imported` response field and physical meter association API.
+
+Release sequence:
+
+1. Publish the Home Assistant Energy Usage release.
+2. Complete and publish stable Energy Ingest 0.1.9.
+
+Stable Energy Ingest 0.1.9 publication is a prerequisite
