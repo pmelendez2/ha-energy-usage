@@ -69,10 +69,58 @@ Home Assistant and Energy Ingest environments:
   are written and a later scheduled cycle recovers without fabricated data.
 - Verify an accepted source correction updates the full cumulative series.
 - Restart and reload repeatedly; check for duplicate listeners or stale locks.
-- Upgrade an existing 0.1.1 development installation in place, preserving
+- Upgrade an existing installation to v0.1.2 in place, preserving
   configuration, credentials, and historical Recorder statistics.
 - Confirm INFO/DEBUG logs for normal events and ERROR logs for failures.
 
 These are acceptance requirements, not claims of completed live testing.
 The published v0.1.2 release does not establish completion of every live
 failure-recovery or upgrade acceptance scenario.
+
+## ADR-0003 guided utility workflow runtime acceptance
+
+Use an isolated Energy Ingest database and development Home Assistant. Before
+each case record the integration commit, API image digest, Core version, and
+Recorder row counts and hashes for both physical meters. Preserve the
+original test XML privately; never attach credentials or customer XML.
+
+1. Configure the integration. Confirm the setup review lists the physical
+   meter IDs, commodities, and names returned by Energy Ingest. Confirm the
+   options form shows the same authoritative inventory.
+2. Upload electricity and gas XML. Inspect the import counters and returned
+   resource IDs independently of association and Recorder results.
+3. Repeat an unchanged XML import. Confirm identical resource IDs, no
+   duplicate resources, and existing mappings preselected and locked.
+4. Leave an unknown resource unselected. Confirm synchronization is blocked.
+   Test two meters of the same commodity; no automatic choice is allowed.
+5. Map an unassociated resource, then attempt a conflicting reassignment.
+   The backend must retain its existing physical meter and Recorder must
+   receive no history from the attempted conflicting mapping.
+6. Interrupt the workflow after import, after partial association, and during
+   Recorder synchronization. Restart Home Assistant each time. Confirm that
+   the pending-resource journal allows safe recovery without XML persistence
+   and that repeating the XML import remains idempotent.
+7. Import multiple XML files with mixed outcomes. Verify that each filename
+   has its own plain-English result, including previously imported files,
+   accepted new or corrected readings, and unchanged usage data.
+8. Verify that exact XML replays are identified using the canonical Energy
+   Ingest `already_imported` result, not inferred from zero reading counts.
+9. Verify that an import failure identifies the affected filename and that
+   successfully processed earlier files remain listed.
+10. Verify that the import summary remains visible after automatic Recorder
+   synchronization and that physical meter names replace internal IDs.
+11. Verify that an incompatible Energy Ingest API does not incorrectly report
+   a file as previously imported.
+12. Simulate API outage and recovery. Ensure the error stage is visible and
+   no unverified success is reported. Retry only the affected meters.
+13. Correct an existing observation and import actual readings for a formerly
+   missing period. Confirm Recorder read-back reflects the supplied data and
+   cumulative corrections, with no invented intermediate readings.
+14. Verify that an administrator can upload and a nonadministrator receives
+   HTTP 403. Confirm bounded upload sizes and no bearer tokens in card state.
+15. Reload and upgrade the integration, preserving configured meters, pending
+   resource IDs, authenticators, and existing Recorder statistics. Compare
+   counts and hashes before and after each operation.
+
+All cases require recorded pass/fail evidence before calling ADR-0003 runtime
+accepted or deploying the development upload workflow to production.

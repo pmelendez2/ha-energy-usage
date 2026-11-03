@@ -23,7 +23,9 @@ PLATFORMS = [Platform.SENSOR, Platform.BUTTON]
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
-EXPLORER_URL = "/energy_usage/energy-usage-explorer.js"
+EXPLORER_URL = "/energy-usage/energy-usage-explorer.js"
+LEGACY_EXPLORER_URL = "/energy_usage/energy-usage-explorer.js"
+UTILITY_CARD_URL = "/energy-usage/energy-usage-utility-card.js"
 
 async def async_register_explorer(hass):
     """Register the bundled Energy Usage Explorer resource."""
@@ -33,19 +35,24 @@ async def async_register_explorer(hass):
         / "energy-usage-explorer.js"
     )
 
+    utility_path = explorer_path.with_name(
+        "energy-usage-utility-card.js"
+    )
     await hass.http.async_register_static_paths(
         [
-            StaticPathConfig(
-                EXPLORER_URL,
-                str(explorer_path),
-                cache_headers=False,
-            )
+            StaticPathConfig(path, str(explorer_path), False)
+            for path in (EXPLORER_URL, LEGACY_EXPLORER_URL)
+        ] + [
+            StaticPathConfig(UTILITY_CARD_URL, str(utility_path), False)
         ]
     )
 
 async def async_setup(hass, config):
     """Set up integration-wide Energy Usage resources."""
     await async_register_explorer(hass)
+    from .utility_upload import UtilityUploadView
+
+    hass.http.register_view(UtilityUploadView(hass))
     return True
 
 async def async_setup_entry(hass, entry):

@@ -11,17 +11,17 @@
 
 **Last Updated:** 2026-10-29
 
-**Energy Usage** (`ha_energy_usage`) is a community-developed Home Assistant
+**Energy Usage** (`ha-energy-usage`) is a community-developed Home Assistant
 custom integration that reads accepted electricity and natural gas consumption
 from a separately installed **Energy Ingest** service. It can import utility
 history into Home Assistant Recorder for the built-in Energy Dashboard and can
 provide an optional **Energy Usage Explorer** dashboard card.
 
-> **Release status:** Version 0.1.0 is published. Electricity and gas
-> statistics, the Energy Dashboard, and Explorer were validated on `piha`
-> in production on 2026-10-26. The one-click import improvements are
-> proposed for 0.1.1 and are not yet released. HACS default-catalog
-> acceptance and Home Assistant Core inclusion have not occurred.
+> **Release status:** Version 0.1.2 is published. Electricity and gas
+> statistics, the Energy Dashboard, and Explorer have been validated in
+> production. Guided utility uploads remain in development and are not
+> part of this release. HACS default-catalog acceptance and Home Assistant
+> Core inclusion have not occurred.
 
 ## Features
 

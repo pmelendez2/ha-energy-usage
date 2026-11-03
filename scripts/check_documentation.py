@@ -63,6 +63,41 @@ for path in files:
             if invalid in source:
                 errors.append(f'{relative}: developer-only wording: {invalid}')
 
+# Public guidance must not assume a maintainer's private deployment.
+PUBLIC_GUIDES = (
+    'README.md', 'INSTALLATION.md', 'QUICKSTART.md',
+    'docs/UPGRADING.md', 'docs/TROUBLESHOOTING.md',
+)
+PRIVATE_DEPLOYMENT = re.compile(
+    r'\b(?:piha(?:-w)?|sparta|pme991|hass_homeassistant)\b'
+    r'|/opt/homeassistant/config|docker service update --force',
+    re.IGNORECASE,
+)
+for name in PUBLIC_GUIDES:
+    content = (ROOT / name).read_text(encoding='utf-8')
+    for match in PRIVATE_DEPLOYMENT.finditer(content):
+        errors.append(f'{name}: private deployment reference: '
+                      f'{match.group(0)}')
+
+# Keep current navigation consistent in all maintained documentation.
+OLD_NAVIGATION = re.compile(
+    r'Developer [Tt]ools\s*(?:→|/)\s*(?:Statistics|Actions)'
+    r'|Developer tools / Settings'
+)
+for path in files:
+    for match in OLD_NAVIGATION.finditer(path.read_text(encoding='utf-8')):
+        errors.append(f'{path.relative_to(ROOT)}: outdated menu: '
+                      f'{match.group(0)}')
+
+# Documentation describes only the current Home Assistant integration
+# release. Do not mistake Home Assistant Core or Energy Ingest versions for
+# this package's release; restrict the check to older 0.1.x references.
+OLD_RELEASE = re.compile(r'(?<![\d.])v?0\.1\.(?:0|1)(?!\d)')
+for path in files:
+    for match in OLD_RELEASE.finditer(path.read_text(encoding='utf-8')):
+        errors.append(f'{path.relative_to(ROOT)}: obsolete release: '
+                      f'{match.group(0)}')
+
 if errors:
     print('\n'.join(errors))
     raise SystemExit(f'Documentation: FAIL ({len(errors)} issues)')
