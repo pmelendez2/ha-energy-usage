@@ -7,7 +7,7 @@
 
 **Status:** v0.1.2 published; runtime acceptance partially complete
 
-**Release:** 0.1.2
+**Release:** 0.1.3
 
 **Last Updated:** 2026-10-23
 

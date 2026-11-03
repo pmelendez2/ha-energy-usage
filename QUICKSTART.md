@@ -5,9 +5,9 @@
 
 **Purpose:** Install and display electricity and gas usage simply.
 
-**Status:** Published v0.1.2; utility upload preview in development
+**Status:** Published v0.1.3
 
-**Release:** 0.1.2
+**Release:** 0.1.3
 
 **Last Updated:** 2026-11-02
 
@@ -80,12 +80,14 @@ daily, not hourly. Missing periods remain missing; no billing is calculated.
 For advanced installation, source validation, and manual troubleshooting,
 see [Installation](INSTALLATION.md).
 
-## Updating utility data (development preview)
+## Updating utility data
 
-The utility upload card is not included in the published v0.1.2 release.
+The utility upload card includes the guided utility import card.  Energy Ingest 0.1.9 is required.
+
 For development validation, add `/energy-usage/energy-usage-utility-card.js`
 as a JavaScript module under **Settings → Dashboards → Resources**.
-Add **Custom: Energy Usage Utility Card** to a development dashboard.
+Add **Custom: Energy Usage Utility Card** to your development dashboard.
+
 Use the visual card editor to enter the utility's HTTPS download website
 and optionally set the number of resources shown per page.
 The preferred acquisition source ID is optional. If your Home Assistant
@@ -117,7 +119,7 @@ synchronization then begins automatically. Inspect Recorder verification
 separately from import acceptance.
 No utility passwords or API tokens belong in card configuration.
 
-## Selecting utility XML files (development preview)
+## Selecting utility XML files
 
 The utility dashboard card offers **Choose Files** and **Choose Folder**.
 You can use either or both; selections are combined, and repeated files
