@@ -38,6 +38,17 @@ class EnergyUsageUtilityCard extends HTMLElement {
       li { margin: 6px 0; overflow-wrap: anywhere; }
       li label { display: inline; margin: 0; }
       pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+      .association-warning {
+        border: 2px solid var(--warning-color, #e6a23c);
+        border-radius: 8px;
+        padding: 12px;
+        margin: 16px 0;
+        background: var(--card-background-color);
+      }
+      .association-warning strong {
+        display: block;
+        margin-bottom: 8px;
+      }
     `;
     root.appendChild(style);
     const card = document.createElement("ha-card");
@@ -120,6 +131,22 @@ class EnergyUsageUtilityCard extends HTMLElement {
           sourceSelect.value = preferred;
         }
         setDownload();
+        const remembered = response.pending_resources || [];
+        if (!Array.isArray(remembered)) {
+          throw new Error("Invalid pending resource state");
+        }
+        for (const state of remembered) addResource(state);
+        if (remembered.length) {
+          status.textContent =
+            `${response.pending_count || remembered.length}` +
+            " imported resource(s) " +
+            "await association review or Recorder verification. " +
+            "Resume below; the XML files need not be uploaded again.";
+          renderMappings();
+          if (pendingResources.some(item => item.confirmed)) {
+            void submitMappings(true);
+          }
+        }
         update();
       } catch (error) {
         sourceSelect.replaceChildren();
@@ -131,8 +158,10 @@ class EnergyUsageUtilityCard extends HTMLElement {
       }
     };
     const instructions = document.createElement("p");
-    instructions.textContent = "Add XML files, a folder, or both. " +
-      "Review the checked files, import, then confirm each physical meter.";
+    instructions.textContent = "Choose XML files or a folder, review " +
+      "your selections, and import. Existing physical meter associations " +
+      "are reused automatically. Select a physical meter only when " +
+      "an association needs confirmation.";
     article.appendChild(instructions);
     const picker = (text, folder) => {
       const input = document.createElement("input");
@@ -164,7 +193,7 @@ class EnergyUsageUtilityCard extends HTMLElement {
     const selectAll = document.createElement("button");
     selectAll.textContent = "Select all";
     const clear = document.createElement("button");
-    clear.textContent = "Clear selection";
+    clear.textContent = "Clear files";
     controls.append(selectAll, clear);
     article.appendChild(controls);
     selectAll.disabled = true;
@@ -173,8 +202,9 @@ class EnergyUsageUtilityCard extends HTMLElement {
     list.setAttribute("aria-label", "Discovered XML files");
     article.appendChild(list);
     const retry = document.createElement("button");
-    retry.textContent = "Retry Recorder synchronization";
+    retry.textContent = "Retry association and Recorder synchronization";
     retry.disabled = true;
+    retry.hidden = true;
     article.appendChild(retry);
     const button = document.createElement("button");
     button.textContent = "Import XML files";
@@ -185,23 +215,103 @@ class EnergyUsageUtilityCard extends HTMLElement {
     mappingHeading.textContent = "Confirm physical meters";
     mappingHeading.hidden = true;
     article.appendChild(mappingHeading);
+    const associationWarning = document.createElement("div");
+    associationWarning.className = "association-warning";
+    associationWarning.setAttribute("role", "alert");
+    associationWarning.hidden = true;
+
+    const warningTitle = document.createElement("strong");
+    warningTitle.textContent =
+      "Action required — Confirm physical meters";
+
+    const warningMessage = document.createElement("p");
+    warningMessage.textContent =
+      "Your XML files were imported successfully, but some usage " +
+      "readings have not yet been added to Home Assistant history. " +
+      "Select the correct physical meter for each item below, then " +
+      "click Confirm meters and finish.";
+
+    associationWarning.append(warningTitle, warningMessage);
+    article.appendChild(associationWarning);
     const mappingList = document.createElement("div");
     mappingList.style.maxHeight = "320px";
     mappingList.style.overflowY = "auto";
     article.appendChild(mappingList);
+    const moreMappings = document.createElement("button");
+    moreMappings.textContent = "Show more resources";
+    moreMappings.hidden = true;
+    article.appendChild(moreMappings);
     const confirm = document.createElement("button");
-    confirm.textContent = "Confirm associations and synchronize";
+    confirm.textContent = "Confirm meters and finish";
     confirm.hidden = true;
     confirm.disabled = true;
     article.appendChild(confirm);
+    const importDetails = document.createElement("pre");
+    importDetails.setAttribute("aria-label", "XML import results");
+    importDetails.hidden = true;
+    article.appendChild(importDetails);
     const status = document.createElement("pre");
     status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
     status.textContent = "Select files or a folder to review XML documents.";
     article.appendChild(status);
 
     let candidates = [];
     let busy = false;
     let pendingResources = [];
+    const autoAttempted = new Set();
+    const verifiedMeters = new Map();
+    let completedOutcomes = [];
+    const configuredLimit = Number(this.config.resource_display_limit);
+    const pageSize = Number.isSafeInteger(configuredLimit) &&
+      configuredLimit >= 10 && configuredLimit <= 500 ?
+      configuredLimit : 50;
+    let visibleCount = pageSize;
+    moreMappings.addEventListener("click", () => {
+      visibleCount += pageSize;
+      renderMappings();
+    });
+    const addResource = state => {
+      if (!state || !Number.isSafeInteger(state.resource_id) ||
+          state.resource_id <= 0) {
+        throw new Error("Invalid imported resource identity");
+      }
+      const meter = state.physical_meter_id;
+      const commodity = state.commodity;
+      if (!Number.isSafeInteger(commodity) ||
+          ![1, 7].includes(commodity)) {
+        throw new Error("Resource commodity unavailable; update Energy " +
+          "Ingest before confirming physical meters");
+      }
+      if (meter !== null && meter !== undefined &&
+          (!Number.isSafeInteger(meter) || meter <= 0)) {
+        throw new Error("Invalid confirmed physical meter");
+      }
+      if (meter && !availableMeters.some(item =>
+        item.id === meter && Number(item.commodity) === commodity)) {
+        throw new Error("Confirmed meter has incompatible commodity");
+      }
+      const found = pendingResources.find(
+        item => item.resourceId === state.resource_id
+      );
+      if (found) {
+        if (found.commodity !== commodity) {
+          throw new Error("Conflicting resource commodity");
+        }
+        if (meter && found.meterId && found.meterId !== meter) {
+          throw new Error("Conflicting physical meter association");
+        }
+        if (meter) found.meterId = meter;
+        found.confirmed = Boolean(meter);
+      } else {
+        pendingResources.push({
+          resourceId: state.resource_id,
+          commodity,
+          meterId: meter || null,
+          confirmed: Boolean(meter),
+        });
+      }
+    };
     const selected = () => candidates.filter(item => item.checked);
     const update = () => {
       button.disabled = busy || sourceSelect.disabled ||
@@ -209,12 +319,14 @@ class EnergyUsageUtilityCard extends HTMLElement {
       sourceSelect.disabled = busy || !sourceSelect.options.length;
       download.setAttribute("aria-disabled", String(busy));
       retry.disabled = busy || !retry.dataset.available ||
-        pendingResources.some(item => !item.meterId);
-      confirm.disabled = busy || !pendingResources.length ||
-        pendingResources.some(item => !item.meterId);
+        !pendingResources.some(item => item.meterId);
+      retry.hidden = !retry.dataset.available;
+      const unresolved = pendingResources.filter(item => !item.confirmed);
+      confirm.disabled = busy || !unresolved.length ||
+        unresolved.some(item => !item.meterId);
       selectAll.disabled = busy || candidates.length === 0 ||
         selected().length === candidates.length;
-      clear.disabled = busy || selected().length === 0;
+      clear.disabled = busy || candidates.length === 0;
       filesPicker.disabled = busy;
       folderPicker.disabled = busy;
       filesControl.button.disabled = busy;
@@ -282,27 +394,59 @@ class EnergyUsageUtilityCard extends HTMLElement {
       update();
     };
     selectAll.addEventListener("click", () => toggle(true));
-    clear.addEventListener("click", () => toggle(false));
+    clear.addEventListener("click", () => {
+      candidates = [];
+      completedOutcomes = [];
+      list.replaceChildren();
+      filesPicker.value = "";
+      folderPicker.value = "";
+      importDetails.replaceChildren();
+      importDetails.hidden = true;
+      status.textContent = "No XML files selected.";
+      update();
+    });
+
+    const meterName = meter => {
+      return meter.display_name || meter.name ||
+        (Number(meter.commodity) === 1 ? "Electricity" : "Natural gas");
+    };
 
     const renderMappings = () => {
       mappingList.replaceChildren();
-      mappingHeading.hidden = !pendingResources.length;
-      confirm.hidden = !pendingResources.length;
-      for (const item of pendingResources) {
+
+      const needsConfirmation =
+        pendingResources.some(item => !item.confirmed);
+
+      mappingHeading.hidden = !needsConfirmation;
+      associationWarning.hidden = !needsConfirmation;
+      confirm.hidden = !needsConfirmation;
+
+      moreMappings.hidden = pendingResources.length <= visibleCount;
+      moreMappings.disabled = busy;
+      for (const item of pendingResources.slice(0, visibleCount)) {
         const label = document.createElement("label");
-        label.textContent = `Reading resource ${item.resourceId} — physical meter`;
+        const commodityName = item.commodity === 1 ?
+          "Electricity usage" : "Natural gas usage";
+        label.textContent = `${commodityName} — ` +
+          (item.confirmed ? "confirmed physical meter" :
+            "select physical meter");
+        label.title = `Reading resource ${item.resourceId}`;
         const select = document.createElement("select");
-        select.setAttribute("aria-label", `Meter for resource ${item.resourceId}`);
+        select.setAttribute(
+          "aria-label",
+          `Physical meter for reading resource ${item.resourceId}`
+        );
         const placeholder = document.createElement("option");
         placeholder.value = "";
         placeholder.textContent = "Select physical meter";
         select.appendChild(placeholder);
-        for (const meter of availableMeters) {
+        const compatibleMeters = availableMeters.filter(
+          meter => Number(meter.commodity) === item.commodity
+        );
+        for (const meter of compatibleMeters) {
           const option = document.createElement("option");
           option.value = String(meter.id);
-          option.textContent = `${meter.display_name || meter.name ||
-            `Meter ${meter.id}`} (ID ${meter.id}, ` +
-            `${Number(meter.commodity) === 1 ? "Electricity" : "Gas"})`;
+          option.textContent = meterName(meter);
           select.appendChild(option);
         }
         select.value = item.meterId ? String(item.meterId) : "";
@@ -310,21 +454,33 @@ class EnergyUsageUtilityCard extends HTMLElement {
           item.meterId = Number(select.value) || null;
           update();
         });
-        select.disabled = busy;
+        select.disabled = busy || item.confirmed;
         label.appendChild(select);
         mappingList.appendChild(label);
       }
       update();
     };
-    const submitMappings = async () => {
-      if (!this._hass || busy || !pendingResources.length ||
+    const submitMappings = async (automatic = false, retrying = false) => {
+      if (!this._hass || busy) return;
+      const eligible = pendingResources.filter(item =>
+        item.meterId && (!automatic || item.confirmed &&
+          !autoAttempted.has(item.resourceId))
+      );
+      if (!automatic && !retrying &&
           pendingResources.some(item => !item.meterId)) return;
+      const batch = eligible.slice(0, 128);
+      if (!batch.length) return;
+      if (automatic) {
+        for (const item of batch) autoAttempted.add(item.resourceId);
+      }
       busy = true;
+      status.textContent = "Synchronizing Home Assistant Recorder…";
       update();
+      let success = false;
       try {
         const result = await this._hass.callApi(
           "POST", "energy-usage/utility-upload", {
-            associations: pendingResources.map(item => ({
+            associations: batch.map(item => ({
               resource_id: item.resourceId, meter_id: item.meterId,
             })),
           }
@@ -332,21 +488,48 @@ class EnergyUsageUtilityCard extends HTMLElement {
         if (!result.synchronized) {
           throw new Error(result.error || "Synchronization not confirmed");
         }
-        status.textContent = "Meter associations confirmed. " +
-          "Recorder synchronization verified for meters: " +
-          (result.meter_ids || []).join(", ");
-        pendingResources = [];
+        if (!Array.isArray(result.meter_ids)) {
+          throw new Error("Invalid Recorder verification response");
+        }
+        for (const id of result.meter_ids) {
+          const meter = availableMeters.find(item => item.id === id);
+          if (!meter) {
+            throw new Error("Unknown verified physical meter");
+          }
+          verifiedMeters.set(id, meterName(meter));
+        }
+        const names = [...verifiedMeters.values()].join(", ");
+        status.textContent = "Synchronization completed successfully. " +
+          "Recorder verified for: " + names;
+        if (completedOutcomes.length) {
+          importDetails.textContent = formatImportSummary(
+            completedOutcomes, true
+          );
+        }
+        success = true;
+        const completed = new Set(batch.map(item => item.resourceId));
+        pendingResources = pendingResources.filter(
+          item => !completed.has(item.resourceId)
+        );
         delete retry.dataset.available;
+        if (pendingResources.length) {
+          status.textContent += "\nMore resources remain to synchronize.";
+        }
       } catch (error) {
-        status.textContent = "Association or Recorder retry needed: " +
+        status.textContent = "Association or Recorder verification " +
+          "is incomplete. Review the physical meters and retry: " +
           utilityErrorMessage(error);
         retry.dataset.available = "1";
       } finally {
         busy = false;
         renderMappings();
+        if (success && pendingResources.some(item =>
+          item.confirmed && !autoAttempted.has(item.resourceId))) {
+          void submitMappings(true);
+        }
       }
     };
-    confirm.addEventListener("click", submitMappings);
+    confirm.addEventListener("click", () => void submitMappings(false));
     button.addEventListener("click", async () => {
       if (!this._hass) {
         status.textContent = "Home Assistant unavailable";
@@ -362,13 +545,20 @@ class EnergyUsageUtilityCard extends HTMLElement {
       }
       busy = true;
       delete retry.dataset.available;
-      pendingResources = [];
+      completedOutcomes = [];
+      verifiedMeters.clear();
+      importDetails.hidden = true;
+      importDetails.replaceChildren();
+      // Keep accepted resources pending when another file is imported.
       renderMappings();
       update();
       const outcomes = [];
+      let startAuto = false;
+      let activeFile = null;
       try {
         for (let i = 0; i < queue.length; i++) {
           const file = queue[i].file;
+          activeFile = file.name;
           if (file.size === 0 || file.size > 8 * 1024 * 1024) {
             throw new Error(`${file.name}: XML must be 1 byte to 8 MiB`);
           }
@@ -392,67 +582,126 @@ class EnergyUsageUtilityCard extends HTMLElement {
             !Number.isSafeInteger(id) || id <= 0)) {
             throw new Error("Invalid imported resource identities");
           }
-          for (const resourceId of ids) {
-            if (!pendingResources.some(item => item.resourceId === resourceId)) {
-              pendingResources.push({resourceId, meterId: null});
-            }
+          const associations = result.associations;
+          if (!Array.isArray(associations) ||
+              associations.length !== ids.length) {
+            throw new Error("Association lookup is incomplete");
           }
+          for (const state of associations) addResource(state);
         }
-        status.textContent = formatImportSummary(outcomes, false) +
-          "\nConfirm the physical meter for each imported resource.";
+        activeFile = null;
+        completedOutcomes = outcomes;
+        importDetails.textContent = formatImportSummary(outcomes, false);
+        importDetails.hidden = false;
+
+        const requiresConfirmation =
+          pendingResources.some(item => !item.confirmed);
+
+        status.textContent = requiresConfirmation ?
+          "Import accepted. Action required: confirm the physical " +
+          "meters above to finish saving usage to Home Assistant." :
+          "Import accepted. Synchronizing Home Assistant history.";
+
         renderMappings();
+        if (pendingResources.some(item => item.confirmed)) {
+          // The import batch is complete; synchronize confirmed meters.
+          // Unresolved resources remain visible for explicit selection.
+          startAuto = true;
+        }
+
       } catch (error) {
-        if (pendingResources.length) renderMappings();
-        status.textContent = "Stopped: " + utilityErrorMessage(error) +
-          (outcomes.length ? "\n" + formatImportSummary(outcomes, false) : "");
+          if (pendingResources.length) renderMappings();
+          if (outcomes.length) {
+            importDetails.textContent = formatImportSummary(outcomes, false);
+            importDetails.hidden = false;
+          }
+          const context = activeFile ?
+            `Could not finish importing ${activeFile}: ` :
+            "Import processing failed: ";
+          status.textContent = context + utilityErrorMessage(error);
       } finally {
+
         busy = false;
-        update();
+        renderMappings();
+        if (startAuto) void submitMappings(true);
       }
     });
-    retry.addEventListener("click", submitMappings);
+    retry.addEventListener("click", () => void submitMappings(false, true));
     // Fetch only after the card has Home Assistant's authenticated client.
     this.loadSources = loadSources;
     card.appendChild(article);
     root.appendChild(card);
   }
 }
-// Summarize accepted utility observations without exposing raw API JSON.
-// meter_ids refer to Recorder synchronization, not necessarily XML contents.
+
+// Give the user one plain-English result for each selected XML file.
 function formatImportSummary(outcomes, synchronized) {
-  const lines = [synchronized ?
-    "Import and synchronization completed." :
-    "Import completed; meter association pending."];
-  let checked = 0;
+  const lines = ["Results for each XML file:"];
+  let previouslyImported = 0;
+  let changed = 0;
   let unchanged = 0;
-  let accepted = 0;
+  let empty = 0;
+
   for (const outcome of outcomes) {
-    const result = outcome.result || {};
-    const imported = result.import || {};
+    const imported = (outcome.result || {}).import || {};
+
     for (const key of ["observations", "unchanged", "accepted"]) {
       if (!Number.isSafeInteger(imported[key]) || imported[key] < 0) {
         throw new Error("Invalid import statistics from Energy Ingest");
       }
     }
-    checked += imported.observations;
-    unchanged += imported.unchanged;
-    accepted += imported.accepted;
+
+    if (!Array.isArray(imported.resource_ids) ||
+        imported.resource_ids.some(id =>
+          !Number.isSafeInteger(id) || id <= 0)) {
+      throw new Error("Invalid imported resource identities");
+    }
+
+    if (typeof imported.already_imported !== "boolean") {
+      throw new Error(
+        "Energy Ingest does not report file import status; " +
+        "update the backend before importing XML"
+      );
+    }
+
+    if (imported.already_imported && imported.accepted !== 0) {
+      throw new Error("Conflicting import status from Energy Ingest");
+    }
+
+    let message;
+
+    if (imported.already_imported) {
+      previouslyImported += 1;
+      message = "Already imported — no changes needed.";
+    } else if (imported.accepted > 0) {
+      changed += 1;
+      message = `${imported.accepted} usage reading(s) added or updated.`;
+    } else if (imported.observations > 0) {
+      unchanged += 1;
+      message = "No changes needed — usage data is up to date.";
+    } else {
+      empty += 1;
+      message = "No usage readings were processed from this file.";
+    }
+
     lines.push(`File: ${outcome.file}`);
+    lines.push(`Result: ${message}`);
+    lines.push("");
   }
+
   lines.push(`XML files processed: ${outcomes.length}`);
-  lines.push(`Observations checked: ${checked}`);
-  lines.push(`Already recorded: ${unchanged}`);
-  lines.push(`New observations accepted: ${accepted}`);
-  lines.push("Recorder synchronization: " +
-    (synchronized ? "Completed" : "Not confirmed"));
-  const last = outcomes[outcomes.length - 1];
-  const meters = last && last.result && last.result.meter_ids;
-  if (Array.isArray(meters) && meters.length) {
-    lines.push("Recorder meters synchronized: " + meters.join(", "));
-    lines.push("These meter IDs do not identify the XML file's commodity.");
-  }
-  return lines.join("\n");
+  lines.push(`Already imported: ${previouslyImported}`);
+  lines.push(`Files with added or updated data: ${changed}`);
+  lines.push(`Files already up to date: ${unchanged}`);
+  lines.push(`Files with no readings processed: ${empty}`);
+  lines.push(
+    "Home Assistant history: " +
+    (synchronized ? "Synchronized" : "Not yet verified")
+  );
+
+  return lines.join("\n").trimEnd();
 }
+
 
 // Home Assistant callApi may reject with a response object rather than Error.
 // Do not print credentials or raw response bodies into the dashboard.
@@ -526,7 +775,15 @@ class EnergyUsageUtilityCardEditor extends HTMLElement {
           input.reportValidity();
           return;
         }
-        if (value) next[key] = key === "source_id" ? Number(value) : value;
+        if (key === "resource_display_limit" && value &&
+            (!Number.isSafeInteger(Number(value)) ||
+              Number(value) < 10 || Number(value) > 500)) {
+          input.setCustomValidity("Enter a number from 10 to 500");
+          input.reportValidity();
+          return;
+        }
+        if (value) next[key] = ["source_id", "resource_display_limit"]
+          .includes(key) ? Number(value) : value;
         else delete next[key];
         this._config = next;
         this.dispatchEvent(new CustomEvent("config-changed", {
@@ -537,6 +794,8 @@ class EnergyUsageUtilityCardEditor extends HTMLElement {
       root.appendChild(label);
     };
     const heading = document.createElement("p");
+    field("Resources shown per page (10–500)",
+      "resource_display_limit", "50", "number");
     heading.textContent = "Download websites for registered utilities";
     root.appendChild(heading);
     const websites = document.createElement("div");

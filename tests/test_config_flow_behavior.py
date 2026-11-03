@@ -126,10 +126,27 @@ class ConfigFlowTests(unittest.IsolatedAsyncioTestCase):
             "url": "http://example.test:8080/",
             "api_token": "test-api-token",
         })
+        self.assertEqual(result["type"], "form")
+        self.assertEqual(result["step_id"], "confirm_meters")
+        self.assertIn("No supported physical meters",
+                      self.flow._meter_names)
+        result = await self.flow.async_step_confirm_meters({
+            "confirm_meters": True,
+        })
         self.assertEqual(result["type"], "create_entry")
         self.assertEqual(result["data"]["url"],
                          "http://example.test:8080")
         self.flow._validate.assert_awaited_once()
+
+    async def test_unconfirmed_meter_review_keeps_setup_pending(self):
+        await self.flow.async_step_user({
+            "url": "http://example.test:8080",
+            "api_token": "test-api-token",
+        })
+        result = await self.flow.async_step_confirm_meters({
+            "confirm_meters": False,
+        })
+        self.assertEqual(result["type"], "form")
 
     async def test_user_invalid_auth(self):
         self.flow._validate.side_effect = self.api.EnergyAuthError()

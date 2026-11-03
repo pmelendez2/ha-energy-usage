@@ -22,16 +22,33 @@ class UtilityCardRefinementTests(unittest.TestCase):
 
     def test_human_readable_summary_and_meter_scope(self):
         js = CARD.read_text(encoding="utf-8")
-        self.assertIn("function formatImportSummary(outcomes, synchronized)", js)
-        self.assertIn("Observations checked:", js)
-        self.assertIn("Already recorded:", js)
-        self.assertIn("New observations accepted:", js)
-        self.assertIn("Recorder meters synchronized:", js)
-        self.assertIn("do not identify the XML file's commodity", js)
+        self.assertIn(
+            "function formatImportSummary(outcomes, synchronized)",
+            js,
+        )
+        self.assertIn("Results for each XML file:", js)
+        self.assertIn("Already imported — no changes needed.", js)
+        self.assertIn("usage reading(s) added or updated.", js)
+        self.assertIn("usage data is up to date.", js)
+        self.assertIn("No usage readings were processed", js)
+        self.assertIn("Home Assistant history:", js)
+        self.assertIn('imported.already_imported', js)
+        self.assertIn(
+            "Retry association and Recorder synchronization",
+            js,
+        )
+        self.assertIn(
+            "retry.hidden = !retry.dataset.available",
+            js,
+        )
         self.assertNotIn("JSON.stringify(outcomes, null, 2)", js)
 
     def test_javascript_syntax(self):
         subprocess.run(["node", "--check", str(CARD)], check=True)
+
+    def test_import_summary_values(self):
+        script = CARD.parents[3] / "tests/test-utility-import-summary.cjs"
+        subprocess.run(["node", str(script)], check=True)
 
 
 if __name__ == "__main__":

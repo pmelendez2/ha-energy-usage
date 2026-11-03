@@ -76,6 +76,44 @@ class EnergyApiTests(unittest.IsolatedAsyncioTestCase):
             session.requests[0][0].endswith("/v1/meters/4/stream")
         )
 
+    async def test_canonical_resource_association_lookup(self):
+        for meter, status in ((None, "unassociated"), (7, "associated")):
+            with self.subTest(meter=meter):
+                payload = {"resource_id": 13,
+                           "physical_meter_id": meter, "status": status}
+                session = FakeSession(payload=payload)
+                client = api_module.EnergyApi(
+                    session, "https://example.test", "secret"
+                )
+                self.assertEqual(
+                    await client.resource_association(13), payload
+                )
+                self.assertTrue(session.requests[0][0].endswith(
+                    "/v1/resources/13/association"
+                ))
+
+    async def test_resource_association_rejects_invalid_states(self):
+        for payload in (
+            [], {"resource_id": 14, "physical_meter_id": 1,
+                 "status": "associated"},
+            {"resource_id": 13, "physical_meter_id": None,
+             "status": "associated"},
+            {"resource_id": 13, "physical_meter_id": 3,
+             "status": "unassociated"},
+        ):
+            with self.subTest(payload=payload):
+                client = api_module.EnergyApi(
+                    FakeSession(payload=payload),
+                    "https://example.test", "secret"
+                )
+                with self.assertRaises(api_module.EnergyApiError):
+                    await client.resource_association(13)
+        client = api_module.EnergyApi(
+            FakeSession(), "https://example.test", "secret"
+        )
+        with self.assertRaises(ValueError):
+            await client.resource_association(True)
+
     async def test_authentication_failures(self):
         for status in (401, 403):
             with self.subTest(status=status):

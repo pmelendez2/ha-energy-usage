@@ -38,6 +38,7 @@ class ConfigFlowContractTest(unittest.TestCase):
             "async_step_reauth",
             "async_step_reauth_confirm",
             "async_step_reconfigure",
+            "async_step_confirm_meters",
         } <= methods)
 
     def test_reconfigure_and_reauth_descriptions(self):

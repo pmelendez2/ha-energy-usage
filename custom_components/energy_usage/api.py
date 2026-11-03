@@ -72,6 +72,24 @@ class EnergyApi:
             raise EnergyApiError("Unexpected meter response")
         return data
 
+    async def resource_association(self, resource_id: int):
+        """Read Energy Ingest's canonical resource-to-meter association."""
+        if type(resource_id) is not int or resource_id <= 0:
+            raise ValueError("Invalid reading resource ID")
+        data = await self._get(
+            f"/v1/resources/{resource_id}/association"
+        )
+        if not isinstance(data, dict) or data.get("resource_id") != resource_id:
+            raise EnergyApiError("Invalid resource association response")
+        meter_id = data.get("physical_meter_id")
+        status = data.get("status")
+        if status == "unassociated" and meter_id is None:
+            return data
+        if (status == "associated" and type(meter_id) is int
+                and meter_id > 0):
+            return data
+        raise EnergyApiError("Invalid resource association state")
+
     async def window(
         self, meter_id: int, start: datetime, end: datetime
     ) -> dict:

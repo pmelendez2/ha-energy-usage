@@ -48,6 +48,9 @@ class SyncOptionsTests(unittest.TestCase):
         fields = strings["options"]["step"]["init"]["data"]
         self.assertIn("sync_interval_hours", fields)
         self.assertIn("sync_on_startup", fields)
+        self.assertIn("{meters}",
+                      strings["options"]["step"]["init"]["description"])
+        self.assertIn("confirm_meters", strings["config"]["step"])
 
 
 if __name__ == "__main__":

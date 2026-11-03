@@ -17,7 +17,7 @@ class UtilityCardUsabilityTests(unittest.TestCase):
             'const existing = new Set(',
             'candidates.push({file, checked: true})',
             'selected().length === candidates.length',
-            'clear.disabled = busy || selected().length === 0',
+            'clear.disabled = busy || candidates.length === 0',
         ):
             self.assertIn(expected, source)
         self.assertNotIn('"Acquisition source"', source)

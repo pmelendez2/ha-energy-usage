@@ -33,6 +33,21 @@ class EnergyUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     @staticmethod
+    def _meter_summary(meters):
+        """Display authoritative meter IDs without inferring associations."""
+        if not meters:
+            return "No physical meters registered yet."
+        return "; ".join(
+            f"{meter['display_name']} (ID {meter['id']}, "
+            f"{'Electricity' if meter['commodity'] == 1 else 'Gas'})"
+            for meter in meters
+            if isinstance(meter, dict)
+            and type(meter.get("id")) is int
+            and meter.get("commodity") in (1, 7)
+            and isinstance(meter.get("display_name"), str)
+        ) or "No supported physical meters registered yet."
+
+    @staticmethod
     def async_get_options_flow(config_entry):
         """Provide Home Assistant integration-specific preferences."""
         return EnergyUsageOptionsFlow()
@@ -49,22 +64,39 @@ class EnergyUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             url = user_input[CONF_URL].rstrip("/")
             token = user_input[CONF_TOKEN]
             try:
-                await self._validate(url, token)
+                meters = await self._validate(url, token)
             except EnergyAuthError:
                 errors["base"] = "invalid_auth"
             except (EnergyApiError, ValueError):
                 errors["base"] = "cannot_connect"
             else:
-                await self.async_set_unique_id(url)
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(
-                    title="Energy Usage",
-                    data={CONF_URL: url, CONF_TOKEN: token},
-                )
+                self._pending_connection = (url, token)
+                self._meter_names = self._meter_summary(meters)
+                return await self.async_step_confirm_meters()
         return self.async_show_form(
             step_id="user",
             data_schema=connection_schema(),
             errors=errors,
+        )
+
+    async def async_step_confirm_meters(self, user_input=None):
+        """Make discovered physical-meter identities visible at setup."""
+        if not hasattr(self, "_pending_connection"):
+            return await self.async_step_user()
+        if user_input is not None and user_input.get("confirm_meters"):
+            url, token = self._pending_connection
+            await self.async_set_unique_id(url)
+            self._abort_if_unique_id_configured()
+            return self.async_create_entry(
+                title="Energy Usage",
+                data={CONF_URL: url, CONF_TOKEN: token},
+            )
+        return self.async_show_form(
+            step_id="confirm_meters",
+            data_schema=vol.Schema({
+                vol.Required("confirm_meters", default=False): bool,
+            }),
+            description_placeholders={"meters": self._meter_names},
         )
 
     async def async_step_reauth(self, entry_data):
@@ -159,8 +191,18 @@ class EnergyUsageOptionsFlow(config_entries.OptionsFlow):
             CONF_SYNC_STARTUP, DEFAULT_SYNC_STARTUP
         )
 
+        try:
+            meter_list = await EnergyApi(
+                async_get_clientsession(self.hass),
+                self.config_entry.data[CONF_URL],
+                self.config_entry.data[CONF_TOKEN],
+            ).meters()
+            meter_summary = EnergyUsageConfigFlow._meter_summary(meter_list)
+        except EnergyApiError:
+            meter_summary = "Meter inventory temporarily unavailable."
         return self.async_show_form(
             step_id="init",
+            description_placeholders={"meters": meter_summary},
             data_schema=vol.Schema({
                 vol.Required(
                     CONF_SYNC_HOURS,

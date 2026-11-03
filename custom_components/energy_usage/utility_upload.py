@@ -14,6 +14,7 @@ import logging
 from homeassistant.components.http import HomeAssistantView
 from homeassistant.const import CONF_URL
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.storage import Store
 from aiohttp import web
 
 from .api import EnergyApi, EnergyApiError, EnergyAuthError
@@ -34,6 +35,38 @@ class UtilityUploadView(HomeAssistantView):
     def __init__(self, hass):
         self.hass = hass
         self._lock = asyncio.Lock()
+        self._store = Store(hass, 1, "energy_usage_pending_imports")
+        self._pending = None
+
+    async def _load_pending(self):
+        if self._pending is None:
+            saved = await self._store.async_load()
+            self._pending = saved if isinstance(saved, dict) else {}
+
+    async def _remember(self, entry, resource_ids):
+        """Retain IDs, never XML or credentials, for interrupted imports."""
+        await self._load_pending()
+        previous = self._pending.get(entry.entry_id, [])
+        if not isinstance(previous, list):
+            previous = []
+        ids = sorted(set(previous) | set(resource_ids))
+        self._pending[entry.entry_id] = ids
+        await self._store.async_save(self._pending)
+
+    async def _forget(self, entry, resource_ids):
+        await self._load_pending()
+        old = self._pending.get(entry.entry_id, [])
+        self._pending[entry.entry_id] = [
+            item for item in old if item not in resource_ids
+        ]
+        await self._store.async_save(self._pending)
+
+    async def _lookup(self, entry, resource_ids):
+        api = self._api(entry)
+        return [
+            await api.resource_association(resource_id)
+            for resource_id in resource_ids
+        ]
 
     def _entry(self, request):
         user = request.get("hass_user")
@@ -78,7 +111,24 @@ class UtilityUploadView(HomeAssistantView):
             if type(meter.get("id")) is int
             and meter["id"] in allowed
         ]
-        return self.json({"sources": sources, "meters": meters})
+        await self._load_pending()
+        pending = self._pending.get(entry.entry_id, [])
+        if any(
+            type(item) is not int or item <= 0 for item in pending
+        ):
+            raise web.HTTPBadGateway(text="Invalid pending import state")
+        # A backend outage must not erase the pending recovery journal.
+        try:
+            associations = await self._lookup(entry, pending[:128])
+        except EnergyApiError as exc:
+            raise web.HTTPBadGateway(
+                text="Unable to verify pending resource associations"
+            ) from exc
+        return self.json({
+            "sources": sources, "meters": meters,
+            "pending_resources": associations,
+            "pending_count": len(pending),
+        })
 
     async def _sync(self, entry, meter_ids):
         """Reconcile only explicitly selected, registered meters."""
@@ -126,16 +176,54 @@ class UtilityUploadView(HomeAssistantView):
             raise web.HTTPBadRequest(text="Unknown physical meter")
         api = self._api(entry)
         completed = []
+        # Never submit a mapping that conflicts with canonical identity.
         try:
-            for resource_id, meter_id in zip(resource_ids, meter_ids):
-                completed.append(await api.associate_resource(
-                    meter_id, resource_id,
-                ))
+            states = await self._lookup(entry, resource_ids)
+        except EnergyApiError as exc:
+            raise web.HTTPBadGateway(
+                text="Unable to verify resource associations"
+            ) from exc
+        conflicts = [
+            state["resource_id"] for state, meter_id in zip(states, meter_ids)
+            if state["physical_meter_id"] is not None
+            and state["physical_meter_id"] != meter_id
+        ]
+        if conflicts:
+            return self.json({
+                "associated": [], "synchronized": False,
+                "conflicting_resource_ids": conflicts,
+                "error": "Existing association conflicts with selection",
+            }, status_code=409)
+        try:
+            for state, meter_id in zip(states, meter_ids):
+                if state["physical_meter_id"] == meter_id:
+                    completed.append({
+                        "resource_id": state["resource_id"],
+                        "meter_id": meter_id,
+                        "status": "already_associated",
+                    })
+                else:
+                    completed.append(await api.associate_resource(
+                        meter_id, state["resource_id"],
+                    ))
         except EnergyApiError:
             _LOGGER.warning("Physical meter association incomplete")
             return self.json({
                 "associated": completed, "synchronized": False,
                 "error": "Meter association failed; review and retry",
+            }, status_code=207)
+        # Verify persisted association state before any Recorder operation.
+        try:
+            verified = await self._lookup(entry, resource_ids)
+            if any(
+                state["physical_meter_id"] != meter_id
+                for state, meter_id in zip(verified, meter_ids)
+            ):
+                raise EnergyApiError("Association was not persisted")
+        except EnergyApiError:
+            return self.json({
+                "associated": completed, "synchronized": False,
+                "error": "Association verification failed; retry",
             }, status_code=207)
         try:
             synced = await self._sync(entry, meter_ids)
@@ -145,6 +233,7 @@ class UtilityUploadView(HomeAssistantView):
                 "associated": completed, "synchronized": False,
                 "error": "Recorder synchronization failed; retry mappings",
             }, status_code=207)
+        await self._forget(entry, resource_ids)
         return self.json({
             "associated": completed, "synchronized": True,
             "meter_ids": synced,
@@ -268,4 +357,17 @@ class UtilityUploadView(HomeAssistantView):
             ) from exc
 
         # Canonical import succeeds independently of meter association.
-        return self.json({"import": result, "synchronized": False})
+        await self._remember(entry, result["resource_ids"])
+        try:
+            states = await self._lookup(entry, result["resource_ids"])
+        except EnergyApiError:
+            return self.json({
+                "import": result, "associations": [],
+                "synchronized": False,
+                "error": "Import accepted; association lookup failed. "
+                         "Use recovery to resume.",
+            }, status_code=207)
+        return self.json({
+            "import": result, "associations": states,
+            "synchronized": False,
+        })

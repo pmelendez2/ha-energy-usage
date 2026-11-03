@@ -9,7 +9,7 @@
 
 **Release:** 0.1.2
 
-**Last Updated:** 2026-10-26
+**Last Updated:** 2026-11-02
 
 **First:** Install Energy Ingest and its MariaDB database, import actual
 electricity or gas usage, and start its authenticated API. You also need Home
@@ -86,15 +86,16 @@ The utility upload card is not included in the published v0.1.2 release.
 For development validation, add `/energy-usage/energy-usage-utility-card.js`
 as a JavaScript module under **Settings → Dashboards → Resources**.
 Add **Custom: Energy Usage Utility Card** to a development dashboard.
-Use the visual card editor to enter the utility's HTTPS download website.
-The preferred Utility Company ID is optional. If your Home Assistant
+Use the visual card editor to enter the utility's HTTPS download website
+and optionally set the number of resources shown per page.
+The preferred acquisition source ID is optional. If your Home Assistant
 version does not show the visual editor, use **Show code editor**:
 
 ```yaml
 type: custom:energy-usage-utility-card
 # Optional: use the actual HTTPS utility download page.
 # utility_url: https://your-utility.example/
-# source_id is optional; choose an utility company in the card.
+# source_id is optional; choose a utility company in the card.
 ```
 
 The card does not require a utility website URL to load. If configured,
@@ -102,11 +103,18 @@ the link opens that website in a separate browser tab. The URL is not
 the Energy Ingest API address; configure that connection through the
 Energy Usage integration instead. A failed utility-company request
 shows a diagnostic status and does not enable imports. The card
-retrieves utility companys from Energy Ingest and displays their names.
-Choose the correct source for the selected XML batch. Sign in
+retrieves registered utility companies from Energy Ingest and displays their
+names. When only one company is registered, its dropdown is hidden and it
+is selected automatically. With multiple companies, select the appropriate
+Utility Company for the XML batch. Sign in
 at the utility website yourself, download actual Green Button XML, choose
-the electricity and/or gas files, then select **Import and synchronize**.
-Inspect each import result and confirm Recorder synchronization separately.
+the electricity and/or gas files, then select **Import XML files**.
+Review the association status for each returned reading resource. Existing
+backend-confirmed meter mappings are retained and synchronize automatically
+after the complete XML batch is imported. For unresolved resources, select
+the correct physical meter and choose **Confirm physical meters**; Recorder
+synchronization then begins automatically. Inspect Recorder verification
+separately from import acceptance.
 No utility passwords or API tokens belong in card configuration.
 
 ## Selecting utility XML files (development preview)
@@ -117,13 +125,38 @@ are not added twice. Your browser asks permission to read the selected files; th
 integration cannot set or remember your computer's Downloads directory.
 Review the discovered XML files. Files are checked by default;
 **Select all** is useful after unchecking some files, while **Clear
-selection** unchecks all files without removing them from the list.
-The **Import and synchronize** button remains disabled until a utility
+files** removes all listed filenames and resets the selection.
+The **Import XML files** button remains disabled until a utility
 company loads successfully and at least one file is checked. Only `.xml` files are shown.
 
-The card requires an utility company selected from the backend catalog.
+The card requires a utility company from the backend catalog.
 A batch must contain only XML files from that source; do not mix sources.
+For unresolved resources, Energy Ingest supplies the canonical electricity
+or natural-gas commodity. The card displays this usage type and offers only
+compatible physical meters. Internal resource IDs are not the user-facing
+choice. If commodity metadata is unavailable, the card blocks association
+until a compatible Energy Ingest version is installed; filenames are never
+used to guess the commodity.
 Uploads require a Home Assistant administrator account. If canonical import
-succeeds but Recorder synchronization fails, use **Retry Recorder
-synchronization** without uploading the XML again. This remains a development
-preview until authorization and end-to-end runtime testing are complete.
+succeeds but a later step fails, pending resource IDs survive Home Assistant
+restart in its protected storage. Reopen the card to resume without the XML;
+if interrupted before pending IDs were saved, reimporting the same XML is
+idempotent. Confirm mappings and use **Retry association and Recorder
+synchronization** after an association or Recorder failure. The retry control
+appears only when an earlier attempt needs attention. On reopening the card,
+confirmed pending resources resume synchronization automatically. A progress
+message identifies active synchronization and a completion message identifies
+verified physical meters. The card never saves
+the XML contents, utility credentials, or API token.
+
+The card displays a separate result for each XML file. It explains whether
+the file was previously imported, whether usage readings were added or
+updated, whether existing readings needed no changes, or whether no usage
+readings were processed. Files that have already been imported are clearly
+identified, so you know that no further action is necessary.
+
+After the files are processed, the card separately reports whether Home
+Assistant history was synchronized successfully. A successful XML import
+alone does not establish that Home Assistant history was updated.
+
+Missing usage is never estimated, and billing or rates are out of scope.

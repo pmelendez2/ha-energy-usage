@@ -26,7 +26,9 @@ class UploadSecurityTests(unittest.TestCase):
         self.assertIn('/v1/acquisition-sources', api)
         self.assertIn('"GET", "energy-usage/utility-upload"', card)
         self.assertIn('sourceSelect.value', card)
-        self.assertIn('"Retry Recorder synchronization"', card)
+        self.assertIn(
+            '"Retry association and Recorder synchronization"', card
+        )
 
 
 if __name__ == "__main__":

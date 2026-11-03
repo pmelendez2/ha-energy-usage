@@ -149,8 +149,10 @@ https://www.hacs.dev/docs/faq/custom_repositories/
 4. On the Energy Ingest host, follow [Copy the bearer token](#copy-the-bearer-token).
    Paste the generated `ei_...` value into the **API bearer token** field.
    Do not include the `Bearer` prefix. Never share it in support output.
-5. Submit. Confirm the meter inventory is discovered and check that the
-   electricity and gas physical meters are correctly identified.
+5. Submit. Review the physical meter IDs, commodities, and names discovered
+   from Energy Ingest. Confirm only when they match the intended physical
+   meters. This confirmation does not attach XML resources to meters; guided
+   import requests separate confirmation for unresolved resources.
 
 If authentication fails after an Energy Ingest reinstall or token rotation,
 reauthenticate / reconfigure the integration with the **new** token before
