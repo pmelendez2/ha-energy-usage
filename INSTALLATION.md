@@ -1,16 +1,16 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Install and configure Energy Usage for Home Assistant
 
-**Start here:** This guide covers the published v0.1.2 installation,
+**Start here:** This guide covers the published v0.1.3 installation,
 including guided initial import and advanced validation procedures.
 
 **Audience:** Users and administrators
 
 **Purpose:** Guide first-time installation and usage-history import.
 
-**Status:** Published v0.1.2
+**Status:** Published v0.1.3
 
-**Release:** 0.1.2
+**Release:** 0.1.3
 
 **Last Updated:** 2026-10-29
 
@@ -18,8 +18,9 @@ This guide installs **Energy Usage** as a Home Assistant **custom integration**,
 imports initial electricity and gas history, configures the built-in Energy
 Dashboard, and optionally installs the Energy Usage Explorer custom card.
 
-**Published release:** v0.1.2 is available on GitHub Releases.
-The utility upload card is a development preview, not a released feature.
+**Published release:** v0.1.3 includes guided utility data import.
+Energy Ingest 0.1.9 is required.
+The utility upload card is included in Energy Usage 0.1.3.
 Default HACS catalog inclusion is a separate approval process.
 
 ## 1. Prerequisites
@@ -300,7 +301,7 @@ After installing Energy Usage and restarting Home Assistant:
 2. Open the three-dot menu and select **Resources**.
 3. Add the resource URL matching the published integration version:
 
-   `/energy_usage/energy-usage-explorer.js?v=0.1.2`
+   `/energy_usage/energy-usage-explorer.js`
 
 4. Select **JavaScript module** as the resource type.
 5. Save the resource and reload the dashboard.
@@ -309,7 +310,7 @@ The JavaScript file is served directly by the Energy Usage integration from `cus
 
 #### Verify the installation
 
-Open `/energy_usage/energy-usage-explorer.js?v=0.1.2` on your Home Assistant server. It should return HTTP 200.
+Open `/energy_usage/energy-usage-explorer.js` on your Home Assistant server. It should return HTTP 200.
 
 In the Explorer dashboard, verify that the hourly bar chart, line chart, date navigation, calculation controls, and selected-data-point details are available.
 
@@ -338,19 +339,13 @@ Check all of the following before considering installation complete:
 | Import reports statistics already exist | Initial-import-only mode; do not retry or overwrite an existing series |
 | Gas missing in Energy Dashboard dropdown | Recorder unit should be `thm` with compatible energy metadata, not plain `therm` with an untyped unit class |
 | Dashboard empty today | Select a date/month **within imported history** |
-| Custom element not found | Confirm `/energy_usage/energy-usage-explorer.js?v=0.1.2` returns HTTP 200. Verify the resource type is JavaScript module, and reload the dashboard. |
+| Custom element not found | Confirm `/energy_usage/energy-usage-explorer.js` returns HTTP 200. Verify the resource type is JavaScript module, and reload the dashboard. |
 | Gas hourly chart unavailable | Expected: source gas observations are daily; no hourly values are fabricated |
 | Partial month labeled as month | Treat totals as **selected observations only**; inspect selection range and coverage |
 | Unexpected zero readings | Compare accepted Energy Ingest values before assuming zeros were generated |
 
 ## 11. Important operational limits
 
-The initial-import workflow is distinct from the published **v0.1.2**
-correction-safe synchronization service. The latter supports manual and
-scheduled reconciliation of verified canonical electricity and natural-gas
-usage, including accepted corrections. Normal development runtime
-synchronization passed verification, but complete live failure-recovery
-and upgrade acceptance remains outstanding.
 During configuration-entry unload, scheduling stops and admitted operations
 are drained before their shared runtime is discarded. An API failure must
 not be interpreted as a successful synchronization; the next cycle may retry.
