@@ -7,7 +7,7 @@
 
 **Status:** PR #12817 open; awaiting maintainer review
 
-**Release:** 0.1.3
+**Release:** 0.1.4
 
 **Last Updated:** 2026-10-29
 

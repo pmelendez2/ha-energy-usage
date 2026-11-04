@@ -1,16 +1,16 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Install and configure Energy Usage for Home Assistant
 
-**Start here:** This guide covers the published v0.1.3 installation,
+**Start here:** This guide covers the upcoming v0.1.4 installation,
 including guided initial import and advanced validation procedures.
 
 **Audience:** Users and administrators
 
 **Purpose:** Guide first-time installation and usage-history import.
 
-**Status:** Published v0.1.3
+**Status:** v0.1.4 release preparation
 
-**Release:** 0.1.3
+**Release:** 0.1.4
 
 **Last Updated:** 2026-11-04
 
@@ -18,9 +18,9 @@ This guide installs **Energy Usage** as a Home Assistant **custom integration**,
 imports electricity and gas usage through the Utility Card, configures the
 built-in Energy Dashboard, and optionally adds the Explorer card.
 
-**Published release:** v0.1.3 includes guided utility data import.
+**Release scope:** v0.1.4 includes guided utility data import.
 Energy Ingest 0.1.9 is required.
-The utility upload card is included in Energy Usage 0.1.3.
+The utility upload card is included in Energy Usage 0.1.4.
 Default HACS catalog inclusion is a separate approval process.
 
 ## 1. Prerequisites
@@ -180,7 +180,7 @@ reading is missing data and must **not** be replaced with zero.
 
 ## 5. Add the Utility Card and import Green Button XML
 
-The Utility Card ships with Energy Usage v0.1.3. It is not automatically
+The Utility Card ships with Energy Usage v0.1.4. It is not automatically
 added to the Energy Dashboard or the Home Assistant card picker. You must
 register its JavaScript resource and add a Manual card.
 

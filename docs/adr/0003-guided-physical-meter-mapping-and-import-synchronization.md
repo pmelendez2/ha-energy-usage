@@ -9,7 +9,7 @@ for guided Green Button uploads.
 
 **Status:** Accepted
 
-**Release:** 0.1.3
+**Release:** 0.1.4
 
 **Last Updated:** 2026-10-30
 

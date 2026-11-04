@@ -7,13 +7,26 @@
 
 **Status:** Published release history
 
-**Release:** 0.1.3
+**Release:** 0.1.4
 
 **Last Updated:** 2026-10-29
 
-## Unreleased
+## Unreleased — v0.1.4
 
-No changes recorded.
+### Changed
+
+- Clarify JavaScript resource registration, Manual card setup, and utility
+  download-website configuration in installation and quick-start guidance.
+- Accept HTTP and HTTPS download websites in the Utility Card editor.
+- Remove the obsolete underscore-path Explorer JavaScript resource alias.
+- Expand resource and Utility Card regression checks.
+
+### Verification
+
+- Development Home Assistant verified canonical Explorer and Utility Card
+  resources, with the obsolete Explorer route returning HTTP 404.
+- Python, JavaScript, documentation, HACS, Hassfest, and Python compatibility
+  checks passed for PR #10. Production v0.1.4 upgrade remains pending.
 
 ## 0.1.3 — Guided Utility Import (2026-11-03)
 

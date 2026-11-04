@@ -5,9 +5,9 @@
 
 **Purpose:** Resolve common installation and history-import errors
 
-**Status:** Published v0.1.2 guidance
+**Status:** v0.1.4 release preparation
 
-**Release:** 0.1.3
+**Release:** 0.1.4
 
 **Last Updated:** 2026-10-26
 
@@ -28,7 +28,8 @@
 | Import action says “Unknown error” but graphs exist | Determine whether data was already imported. | Open **Tools → Statistics** and inspect both series. Repeating an initial import returns an error when history already exists. |
 | Energy Dashboard shows nothing today | Choose a period with imported data. | In the Energy Dashboard date picker, select a month within the coverage reported by `analyze-prod-data.sh`. Confirm **Settings → Dashboards → Energy** uses the correct electricity and gas statistics. |
 | Gas is displayed in kWh | Check the original statistic unit. | In **Tools → Statistics**, verify that the gas series is in `thm`. Home Assistant can convert gas energy to kWh for display. |
-| Explorer reports an unknown card | Check the JavaScript resource. | Under **Settings → Dashboards → Resources**, add `/energy-usage/energy-usage-explorer.js?v=0.1.2` as a **JavaScript module**, save, and refresh. Match the query version to the installed integration. |
+| Explorer reports an unknown card | Check the JavaScript resource. | Under **Settings → Dashboards → Resources**, add `/energy-usage/energy-usage-explorer.js` as a **JavaScript module**, save, and reload. Do not use the removed underscore-path URL or a version query. |
+| Utility Card reports an unknown card | Check the JavaScript resource and Manual card configuration. | Register `/energy-usage/energy-usage-utility-card.js` under **Resources** as a **JavaScript module**. Separately add a **Manual** card with `type: custom:energy-usage-utility-card`; do not enter card YAML as a resource URL. |
 | Gas has no hourly graph | Use its actual daily cadence. | Choose daily or monthly gas views. SDG&E gas observations are daily; no hourly samples are generated. |
 
 Commands above use the standard Energy Ingest production bundle path. If
