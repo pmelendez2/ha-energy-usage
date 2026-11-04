@@ -7,7 +7,7 @@
 
 **Status:** Current documentation baseline
 
-**Release:** 0.1.3
+**Release:** 0.1.4
 
 **Last Updated:** 2026-10-29
 
@@ -31,7 +31,7 @@ release. HACS default-catalog acceptance is a separate review.
 The maintainer's [HACS submission checklist](HACS_SUBMISSION.md)
 tracks the external application and outstanding checks.
 
-**Version 0.1.2 limitations:** Explicit initial Recorder import is supported
+**Current limitations:** Explicit initial Recorder import is supported
 for previously empty statistic series. Correction-safe synchronization is
 available, while full lifecycle and failure-recovery runtime acceptance
 remains outstanding. Solar production/export ingestion is out of scope.

@@ -5,9 +5,9 @@
 
 **Purpose:** Install and display electricity and gas usage simply.
 
-**Status:** Published v0.1.3
+**Status:** v0.1.4 release preparation
 
-**Release:** 0.1.3
+**Release:** 0.1.4
 
 **Last Updated:** 2026-11-04
 
