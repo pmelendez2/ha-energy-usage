@@ -46,7 +46,7 @@ class UtilityCardTests(unittest.TestCase):
     def test_public_urls_are_hyphenated(self):
         text = (BASE / "__init__.py").read_text()
         self.assertIn('/energy-usage/energy-usage-explorer.js', text)
-        self.assertIn('LEGACY_EXPLORER_URL', text)
+        self.assertNotIn('LEGACY_EXPLORER_URL', text)
         self.assertIn('/energy-usage/energy-usage-utility-card.js', text)
 
 

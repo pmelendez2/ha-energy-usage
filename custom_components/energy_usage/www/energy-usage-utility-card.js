@@ -74,12 +74,14 @@ class EnergyUsageUtilityCard extends HTMLElement {
       const selected = sourceSelect.selectedOptions[0];
       const utilityId = selected && selected.dataset.utilityId;
       const utilityName = selected && selected.textContent;
-      const raw = sites[utilityId] ||
-        (sourceSelect.options.length === 1 ? this.config.utility_url : "");
+      const raw = sites[utilityId] || "";
       let url;
       try {
         url = new URL(raw);
-        if (url.protocol !== "https:") throw new Error();
+        if (!["http:", "https:"].includes(url.protocol) ||
+            !url.hostname || url.username || url.password) {
+          throw new Error("Invalid utility website URL");
+        }
       } catch (_) {
         download.hidden = true;
         return;
@@ -758,16 +760,6 @@ class EnergyUsageUtilityCardEditor extends HTMLElement {
       input.addEventListener("change", () => {
         const next = {...this._config};
         const value = input.value.trim();
-        if (key === "utility_url" && value) {
-          try {
-            const url = new URL(value);
-            if (url.protocol !== "https:") throw new Error();
-          } catch (_) {
-            input.setCustomValidity("Enter an HTTPS website URL");
-            input.reportValidity();
-            return;
-          }
-        }
         input.setCustomValidity("");
         if (key === "source_id" && value &&
             (!Number.isSafeInteger(Number(value)) || Number(value) <= 0)) {
@@ -829,21 +821,23 @@ class EnergyUsageUtilityCardEditor extends HTMLElement {
         websites.replaceChildren();
         for (const [id, name] of utilities) {
           const label = document.createElement("label");
-          label.textContent = `${name} download website (HTTPS)`;
+          label.textContent = `${name} download website (HTTP or HTTPS)`;
           const input = document.createElement("input");
           input.type = "url";
-          input.placeholder = "https://utility.example/";
-          input.value = (this._config.utility_websites || {})[id] ||
-            (utilities.size === 1 ? this._config.utility_url || "" : "");
+          input.placeholder = "http://utility.example/";
+          input.value = (this._config.utility_websites || {})[id] || "";
           input.addEventListener("change", () => {
             const value = input.value.trim();
             if (value) {
               try {
                 const url = new URL(value);
-                if (url.protocol !== "https:" || !url.hostname ||
+                if (!["http:", "https:"].includes(url.protocol) ||
+                    !url.hostname ||
                     url.username || url.password) throw new Error();
               } catch (_) {
-                input.setCustomValidity("Enter a valid HTTPS website URL");
+                input.setCustomValidity(
+                  "Enter a valid HTTP or HTTPS website URL"
+                );
                 input.reportValidity();
                 return;
               }
@@ -854,8 +848,6 @@ class EnergyUsageUtilityCardEditor extends HTMLElement {
             if (value) updated[id] = value;
             else delete updated[id];
             next.utility_websites = updated;
-            // Migrate the legacy single-utility setting automatically.
-            delete next.utility_url;
             this._config = next;
             this.dispatchEvent(new CustomEvent("config-changed", {
               detail: {config: {...next}}, bubbles: true, composed: true
