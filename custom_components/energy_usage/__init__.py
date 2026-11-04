@@ -24,7 +24,6 @@ PLATFORMS = [Platform.SENSOR, Platform.BUTTON]
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 EXPLORER_URL = "/energy-usage/energy-usage-explorer.js"
-LEGACY_EXPLORER_URL = "/energy_usage/energy-usage-explorer.js"
 UTILITY_CARD_URL = "/energy-usage/energy-usage-utility-card.js"
 
 async def async_register_explorer(hass):
@@ -40,9 +39,7 @@ async def async_register_explorer(hass):
     )
     await hass.http.async_register_static_paths(
         [
-            StaticPathConfig(path, str(explorer_path), False)
-            for path in (EXPLORER_URL, LEGACY_EXPLORER_URL)
-        ] + [
+            StaticPathConfig(EXPLORER_URL, str(explorer_path), False),
             StaticPathConfig(UTILITY_CARD_URL, str(utility_path), False)
         ]
     )

@@ -12,11 +12,11 @@ including guided initial import and advanced validation procedures.
 
 **Release:** 0.1.3
 
-**Last Updated:** 2026-10-29
+**Last Updated:** 2026-11-04
 
 This guide installs **Energy Usage** as a Home Assistant **custom integration**,
-imports initial electricity and gas history, configures the built-in Energy
-Dashboard, and optionally installs the Energy Usage Explorer custom card.
+imports electricity and gas usage through the Utility Card, configures the
+built-in Energy Dashboard, and optionally adds the Explorer card.
 
 **Published release:** v0.1.3 includes guided utility data import.
 Energy Ingest 0.1.9 is required.
@@ -28,9 +28,9 @@ Default HACS catalog inclusion is a separate approval process.
 1. **Install Energy Ingest and its MariaDB database first.** Follow the
    [Energy Ingest deployment instructions](https://github.com/pmelendez2/energy-ingest)
    for your host. The Energy Usage integration does not create that database.
-2. **Import actual electricity or natural gas observations into Energy
-   Ingest** before setting up Energy Usage in Home Assistant. An empty
-   database or newly registered meters alone are not enough.
+2. **Register your physical electricity and/or natural gas meters** in
+   Energy Ingest. The Utility Card imports actual Green Button XML after
+   setup; an empty initial usage database is acceptable.
 3. **Start the Energy Ingest API** and confirm its production deployment
    passes verification. Record the API hostname and port reachable from Home
    Assistant. `127.0.0.1` inside Home Assistant ordinarily refers to the
@@ -53,11 +53,11 @@ On the **Energy Ingest production host**, run these read-only checks:
 "$HOME/energy-ingest-prod/scripts/analyze-prod-data.sh"
 ```
 
-The verification should pass; the meter list should show your electricity
-and/or gas meter with associated resources. Data analysis should report
-imported resources, hourly electricity or daily gas coverage, and any
-overlapping-source differences. If the database is empty, import your utility
-files using the Energy Ingest installation's import procedure first.
+The verification should pass, and the meter list should show your physical
+electricity and/or gas meters. Before your first XML upload, zero resources
+and no usage coverage are expected. After importing XML through the Utility
+Card, rerun the analysis to inspect resource associations, hourly electricity
+or daily gas coverage, and any overlapping-source differences.
 These commands assume the standard production bundle under
 `$HOME/energy-ingest-prod`; adjust the installation directory if different.
 
@@ -159,35 +159,107 @@ If authentication fails after an Energy Ingest reinstall or token rotation,
 reauthenticate / reconfigure the integration with the **new** token before
 attempting historical imports. Do not delete Recorder data to fix API auth.
 
-## 4. Validate the source history before importing
+## 4. Check the source and meters
 
-For most users, the [read-only production data checks](#confirm-energy-ingest-data-is-ready)
-from step 1 are sufficient preparation. Run `verify-prod.sh`, `meter-prod.sh
-list`, and `analyze-prod-data.sh` on the Energy Ingest host and confirm that
-the expected meters and coverage appear. If desired, the analysis script's
-`--details` option shows diagnostic resource IDs and overlapping values:
+Run the [read-only production checks](#confirm-energy-ingest-data-is-ready)
+and confirm the expected physical meters appear. If XML has already been
+imported, the analysis script's `--details` option shows diagnostic resource
+IDs and overlapping values:
 
 ```bash
 "$HOME/energy-ingest-prod/scripts/analyze-prod-data.sh" --details
 ```
 
-The guided import button validates the actual accepted API
-stream (`resolved: true`, `issues: []`) itself and refuses to import if the
-source is unresolved. Users do not need to construct API calls or expose
-their token for this validation. The manual import action also checks
-accepted observations and refuses invalid or unresolved data.
+Energy Usage validates accepted API readings before Recorder synchronization.
+Unresolved source data is not silently imported into Home Assistant. Users
+do not need to construct API calls or reveal their token for this check.
 
 Electricity source cadence is normally **hourly**. Natural gas source cadence
 is normally **daily**. A reported zero reading is actual data. An absent
 reading is missing data and must **not** be replaced with zero.
 
-## 5. Import historical usage into Recorder
+## 5. Add the Utility Card and import Green Button XML
 
-**Important — initial import only:** This release refuses to append to or
-replace existing statistics. Do not import a short sample period first.
-Do not delete good history in order to repeat the initial import.
+The Utility Card ships with Energy Usage v0.1.3. It is not automatically
+added to the Energy Dashboard or the Home Assistant card picker. You must
+register its JavaScript resource and add a Manual card.
 
-### Recommended guided import
+### Register the JavaScript resource
+
+1. Open **Settings → Dashboards → Resources** (the three-dot menu under
+   Dashboards on versions that place Resources there).
+2. Select **Add resource** and enter this URL:
+
+   ```text
+   /energy-usage/energy-usage-utility-card.js
+   ```
+
+3. Select **JavaScript module** and save. Do not enter `type: custom:...`
+   in Resources; that belongs in the dashboard card editor.
+
+### Add the dashboard card
+
+1. Open the dashboard you want to use and select **Edit dashboard**.
+2. Select **Add card → Manual** (or **Show code editor**) and enter:
+
+   ```yaml
+   type: custom:energy-usage-utility-card
+   ```
+
+3. Save the card.
+
+### Configure the download website
+
+1. Select **Edit dashboard** and edit the **Energy Usage Utility Card**.
+2. Under **Download websites for registered utilities**, enter the utility's
+   HTTP or HTTPS website address (for example, `http://www.sdge.com` for
+   SDG&E). Some sites automatically redirect HTTP visitors to HTTPS.
+3. Save the card. Confirm **Download data from SDG&E** (or your utility's
+   name) appears above **Choose Files**.
+
+The website is optional. Never put utility credentials or API tokens in
+card configuration.
+
+If the card says **Custom element doesn't exist**, check that the resource
+URL returns HTTP 200, that its type is JavaScript module, and that Home
+Assistant has restarted since the integration was installed. Refresh the
+browser cache after upgrading; do not append a version query to the URL.
+
+### Download and import XML
+
+1. Sign in at your utility's website and download its actual **Green Button
+   XML** usage files for electricity and/or natural gas.
+2. Open the Utility Card. With multiple registered utilities, select the
+   correct **Utility Company**. With only one registered company, the card
+   selects it automatically and hides the dropdown.
+3. Use **Choose Files** or **Choose Folder**. Check the XML filenames you
+   want to import. **Select all** checks the listed files; **Clear files**
+   removes the filenames and selections. Do not mix utilities in one batch.
+4. Select **Import XML files**. Review the outcome for each file; successful
+   XML acceptance alone does not mean Recorder synchronization has finished.
+5. Previously confirmed physical-meter associations are reused. For any
+   unresolved reading resources, choose the correct compatible physical
+   meter and select **Confirm physical meters**. Synchronization begins
+   automatically after confirmation; no separate sync confirmation is needed.
+6. Wait for the progress and completion messages, then verify Recorder
+   statistics in step 6. If an operation fails, use the retry control shown
+   by the card. Pending associations can be recovered after a restart.
+
+Only actual utility-provided readings are imported; gaps remain missing.
+The card requires an administrator account for XML upload.
+
+### Alternative: initial history import from existing Energy Ingest data
+
+Use this alternative only when usage observations were already imported into
+Energy Ingest and a meter has no Home Assistant Recorder statistics yet.
+It is not the XML upload workflow and must not be used to overwrite history.
+
+**Important — the alternative initial importer only:** This action refuses
+to append to or replace existing statistics. Do not import a short sample
+period first or delete good history to repeat the initial import. The Utility
+Card's normal synchronization uses the separate correction-safe workflow.
+
+#### Initial import button
 
 Open **Settings → Devices & services → Energy Usage**, select each physical
 meter device, and press **Import complete history (once)**. The button
@@ -196,13 +268,13 @@ date range, and queues the initial Recorder statistics. It will report
 existing history as a validation error rather than overwriting it. No IDs,
 dates, service YAML, or separate API calls are needed.
 
-### Optional manual import action
+#### Optional manual import action
 
 Open **Tools → Actions** (wording depends on your
 Home Assistant version). Select the action
 `energy_usage.import_historical_usage`. Provide the fields below.
 
-### Electricity example
+##### Electricity example
 
 ```yaml
 action: energy_usage.import_historical_usage
@@ -213,7 +285,7 @@ data:
   confirm_initial_import: true
 ```
 
-### Natural gas example
+##### Natural gas example
 
 ```yaml
 action: energy_usage.import_historical_usage
@@ -288,33 +360,25 @@ Official Home Assistant references:
 - https://www.home-assistant.io/docs/energy/
 - https://www.home-assistant.io/docs/energy/gas/
 
-## 8. Install Energy Usage Explorer
+## 8. Add Energy Usage Explorer (optional)
 
+Explorer is bundled with the integration; no separate JavaScript download or
+copy into `/config/www` is required.
 
-Energy Usage Explorer is included with the Energy Usage integration. It is installed with the integration, whether installed manually or through HACS.
+1. Under **Settings → Dashboards → Resources**, add
+   `/energy-usage/energy-usage-explorer.js` as a **JavaScript module**.
+2. Edit a dashboard, choose **Add card → Manual**, and enter:
 
-No separate JavaScript download or manual copy into `/config/www` is required.
+   ```yaml
+   type: custom:energy-usage-explorer
+   ```
 
-After installing Energy Usage and restarting Home Assistant:
+3. Save and refresh. The resource URL should return HTTP 200. Verify hourly
+   bars, line charts, date navigation, and selected-reading details.
 
-1. Open **Settings → Dashboards**.
-2. Open the three-dot menu and select **Resources**.
-3. Add the resource URL matching the published integration version:
-
-   `/energy_usage/energy-usage-explorer.js`
-
-4. Select **JavaScript module** as the resource type.
-5. Save the resource and reload the dashboard.
-
-The JavaScript file is served directly by the Energy Usage integration from `custom_components/energy_usage/www/energy-usage-explorer.js`.
-
-#### Verify the installation
-
-Open `/energy_usage/energy-usage-explorer.js` on your Home Assistant server. It should return HTTP 200.
-
-In the Explorer dashboard, verify that the hourly bar chart, line chart, date navigation, calculation controls, and selected-data-point details are available.
-
-The Explorer uses actual electricity and natural gas consumption observations. Missing periods are not filled with estimated or invented readings.
+Explorer displays actual electricity and gas usage without filling gaps.
+If you previously registered the underscore-path Explorer resource, replace
+it with the hyphenated URL above; the older URL is no longer served.
 
 ## 9. Verify the result
 
@@ -329,6 +393,8 @@ Check all of the following before considering installation complete:
 - DST transitions preserve actual local-date reporting without invented data.
 - Explorer bar/line point selection opens a detail panel; its averages and
   coverage are interpreted in the context of selected observations.
+- The Utility Card reports completion for every imported XML batch and
+  confirms synchronization of mapped physical meters.
 
 ## 10. Troubleshooting
 
@@ -339,7 +405,7 @@ Check all of the following before considering installation complete:
 | Import reports statistics already exist | Initial-import-only mode; do not retry or overwrite an existing series |
 | Gas missing in Energy Dashboard dropdown | Recorder unit should be `thm` with compatible energy metadata, not plain `therm` with an untyped unit class |
 | Dashboard empty today | Select a date/month **within imported history** |
-| Custom element not found | Confirm `/energy_usage/energy-usage-explorer.js` returns HTTP 200. Verify the resource type is JavaScript module, and reload the dashboard. |
+| Custom element not found | Check the corresponding `/energy-usage/energy-usage-utility-card.js` or `/energy-usage/energy-usage-explorer.js` URL for HTTP 200, use JavaScript module, then refresh the browser. |
 | Gas hourly chart unavailable | Expected: source gas observations are daily; no hourly values are fabricated |
 | Partial month labeled as month | Treat totals as **selected observations only**; inspect selection range and coverage |
 | Unexpected zero readings | Compare accepted Energy Ingest values before assuming zeros were generated |

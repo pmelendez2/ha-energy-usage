@@ -19,6 +19,9 @@ class UtilityCompanyMappingTests(unittest.TestCase):
 
     def test_website_security(self):
         code = CARD.read_text()
-        self.assertIn('url.protocol !== "https:"', code)
+        self.assertEqual(
+            code.count('["http:", "https:"].includes(url.protocol)'), 2
+        )
+        self.assertIn('url.username || url.password', code)
         self.assertIn('download.rel = "noopener noreferrer"', code)
         self.assertIn('utility_websites', code)

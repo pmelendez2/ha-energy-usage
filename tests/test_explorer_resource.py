@@ -16,7 +16,6 @@ COMPONENT = (
 INIT_FILE = COMPONENT / "__init__.py"
 EXPLORER_FILE = COMPONENT / "www" / "energy-usage-explorer.js"
 EXPLORER_URL = "/energy-usage/energy-usage-explorer.js"
-LEGACY_EXPLORER_URL = "/energy_usage/energy-usage-explorer.js"
 UTILITY_CARD_URL = "/energy-usage/energy-usage-utility-card.js"
 
 
@@ -54,7 +53,6 @@ def load_setup_functions():
         "Path": Path,
         "StaticPathConfig": StaticPathConfig,
         "EXPLORER_URL": EXPLORER_URL,
-        "LEGACY_EXPLORER_URL": LEGACY_EXPLORER_URL,
         "UTILITY_CARD_URL": UTILITY_CARD_URL,
     }
 
@@ -85,11 +83,10 @@ def test_explorer_static_registration():
     register.assert_awaited_once()
 
     paths = register.await_args.args[0]
-    assert len(paths) == 3
+    assert len(paths) == 2
     assert [path.url_path for path in paths] == [
-        EXPLORER_URL, LEGACY_EXPLORER_URL, UTILITY_CARD_URL
+        EXPLORER_URL, UTILITY_CARD_URL
     ]
-    for path in paths[:2]:
-        assert Path(path.path).resolve() == EXPLORER_FILE.resolve()
-        assert path.cache_headers is False
-    assert Path(paths[2].path).name == "energy-usage-utility-card.js"
+    assert Path(paths[0].path).resolve() == EXPLORER_FILE.resolve()
+    assert Path(paths[1].path).name == "energy-usage-utility-card.js"
+    assert all(path.cache_headers is False for path in paths)

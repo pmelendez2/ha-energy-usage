@@ -15,7 +15,7 @@ class UtilityCardEditorTests(unittest.TestCase):
             'static getStubConfig()',
             'class EnergyUsageUtilityCardEditor',
             '"config-changed"',
-            '"utility_url"',
+            'config.utility_websites',
             '"source_id"',
             '"https:"',
         ):
