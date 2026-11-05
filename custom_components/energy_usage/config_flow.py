@@ -12,6 +12,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .api import EnergyApi, EnergyApiError, EnergyAuthError
 from .const import CONF_TOKEN, DEFAULT_URL, DOMAIN
 from .statistics_sync_settings import (
+    CONF_SYNC_ENABLED, DEFAULT_SYNC_ENABLED,
     CONF_SYNC_HOURS, CONF_SYNC_STARTUP, DEFAULT_SYNC_HOURS,
     DEFAULT_SYNC_STARTUP, SYNC_INTERVAL_CHOICES,
 )
@@ -178,12 +179,14 @@ class EnergyUsageOptionsFlow(config_entries.OptionsFlow):
             return self.async_create_entry(
                 title="",
                 data={
+                    CONF_SYNC_ENABLED: user_input[CONF_SYNC_ENABLED],
                     CONF_SYNC_HOURS: hours,
                     CONF_SYNC_STARTUP: user_input[CONF_SYNC_STARTUP],
                 },
             )
 
         options = self.config_entry.options
+        enabled = options.get(CONF_SYNC_ENABLED, DEFAULT_SYNC_ENABLED)
         hours = options.get(
             CONF_SYNC_HOURS, DEFAULT_SYNC_HOURS
         )
@@ -204,6 +207,7 @@ class EnergyUsageOptionsFlow(config_entries.OptionsFlow):
             step_id="init",
             description_placeholders={"meters": meter_summary},
             data_schema=vol.Schema({
+                vol.Required(CONF_SYNC_ENABLED, default=enabled): bool,
                 vol.Required(
                     CONF_SYNC_HOURS,
                     default=str(hours),

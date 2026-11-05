@@ -1,3 +1,4 @@
+from zoneinfo import ZoneInfo
 # SPDX-License-Identifier: MIT
 """Independent regression tests for graph-ready utility statistics."""
 
@@ -48,7 +49,7 @@ class StatisticsTests(unittest.TestCase):
     def test_hourly_total(self):
         batch = build_statistics(1, 1, "Electric", [
             reading(), reading(1, "2.0")
-        ])
+        ], local_tz=UTC)
         self.assertEqual(batch.statistic_id,
                          "energy_usage:electricity_meter_1")
         self.assertEqual([x["sum"] for x in batch.rows], [1.25, 3.25])
@@ -56,21 +57,21 @@ class StatisticsTests(unittest.TestCase):
     def test_missing_hour_not_inserted(self):
         batch = build_statistics(1, 1, "Electric", [
             reading(), reading(3)
-        ])
+        ], local_tz=UTC)
         self.assertEqual(len(batch.rows), 2)
         self.assertEqual(batch.missing_intervals, 2)
 
     def test_duplicate_rejected(self):
         with self.assertRaises(StatisticsImportError):
-            build_statistics(1, 1, "Electric", [reading(), reading()])
+            build_statistics(1, 1, "Electric", [reading(), reading()], local_tz=UTC)
 
     def test_negative_rejected(self):
         with self.assertRaises(StatisticsImportError):
-            build_statistics(1, 1, "Electric", [reading(value="-1")])
+            build_statistics(1, 1, "Electric", [reading(value="-1")], local_tz=UTC)
 
     def test_non_hourly_electricity_rejected(self):
         with self.assertRaises(StatisticsImportError):
-            build_statistics(1, 1, "Electric", [reading(duration=2)])
+            build_statistics(1, 1, "Electric", [reading(duration=2)], local_tz=UTC)
 
     def test_gas_daily_not_hourly(self):
         from zoneinfo import ZoneInfo
@@ -84,7 +85,7 @@ class StatisticsTests(unittest.TestCase):
         ) for d in dates]
         batch = build_statistics(
             2, 7, "Gas", observations,
-            time_zone="America/Los_Angeles",
+            local_tz=ZoneInfo("America/Los_Angeles"),
         )
         self.assertEqual(batch.unit, "therm")
         self.assertEqual(batch.missing_intervals, 1)
@@ -102,7 +103,7 @@ class StatisticsTests(unittest.TestCase):
         ) for d in dates]
         batch = build_statistics(
             2, 7, "Gas", intervals,
-            time_zone="America/Los_Angeles",
+            local_tz=ZoneInfo("America/Los_Angeles"),
         )
         self.assertEqual(len(batch.rows), 3)
         self.assertEqual(batch.missing_intervals, 0)
@@ -124,18 +125,23 @@ class StatisticsTests(unittest.TestCase):
         ) for d in dates]
         batch = build_statistics(
             2, 7, "Gas", intervals,
-            time_zone="America/Los_Angeles",
+            local_tz=ZoneInfo("America/Los_Angeles"),
         )
         self.assertEqual(batch.missing_intervals, 1)
         self.assertEqual(len(batch.rows), 2)
 
+    def test_missing_timezone_rejected(self):
+        with self.assertRaises(StatisticsImportError):
+            build_statistics(1, 1, "Electric", [reading()],
+                             local_tz="America/Los_Angeles")
+
     def test_empty_rejected(self):
         with self.assertRaises(StatisticsImportError):
-            build_statistics(2, 7, "Gas", [])
+            build_statistics(2, 7, "Gas", [], local_tz=UTC)
 
     def test_unsupported_meter_rejected(self):
         with self.assertRaises(StatisticsImportError):
-            build_statistics(2, 2, "Other", [reading()])
+            build_statistics(2, 2, "Other", [reading()], local_tz=UTC)
 
 
 if __name__ == "__main__":

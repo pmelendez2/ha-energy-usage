@@ -5,9 +5,9 @@
 
 **Purpose:** Resolve common installation and history-import errors
 
-**Status:** v0.1.4 release preparation
+**Status:** v0.1.5 release preparation
 
-**Release:** 0.1.4
+**Release:** 0.1.5
 
 **Last Updated:** 2026-10-26
 

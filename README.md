@@ -5,9 +5,9 @@
 
 **Purpose:** Explain capabilities, prerequisites, and installation paths.
 
-**Status:** v0.1.4 release preparation
+**Status:** v0.1.5 release preparation
 
-**Release:** 0.1.4
+**Release:** 0.1.5
 
 **Last Updated:** 2026-10-29
 
@@ -17,10 +17,10 @@ from a separately installed **Energy Ingest** service. It can import utility
 history into Home Assistant Recorder for the built-in Energy Dashboard and can
 provide an optional **Energy Usage Explorer** dashboard card.
 
-> **Release status:** v0.1.4 is being prepared. Guided utility XML upload,
+> **Release status:** v0.1.5 is being prepared. Guided utility XML upload,
 > meter association, and correction-safe synchronization are included.
 > Electricity and gas statistics have been verified in development; complete
-> v0.1.4 production upgrade acceptance is still pending. HACS default-catalog
+> v0.1.5 production upgrade acceptance is still pending. HACS default-catalog
 > acceptance and Home Assistant Core inclusion have not occurred.
 
 ## Features

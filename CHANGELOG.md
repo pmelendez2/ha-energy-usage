@@ -7,11 +7,27 @@
 
 **Status:** Published release history
 
-**Release:** 0.1.4
+**Release:** 0.1.5
 
-**Last Updated:** 2026-10-29
+**Last Updated:** 2026-11-04
 
-## Unreleased — v0.1.4
+## Unreleased — v0.1.5
+
+### Changed
+
+- Automatic synchronization is opt-in, including existing installations.
+- The interval defaults to 24 hours when enabled, with selectable alternatives.
+- Startup synchronization is disabled by default.
+- Reuse Home Assistant’s configured timezone object for all local-date and
+  statistics calculations; avoid constructing ZoneInfo on the event loop.
+- Accept daily gas reporting times other than SDG&E's 23:59 convention.
+- Align release metadata and installation/upgrade guidance to v0.1.5.
+
+### Verification
+
+- Source unit and contract tests pass; production/HACS review is pending.
+
+## Previously prepared — v0.1.4
 
 ### Changed
 

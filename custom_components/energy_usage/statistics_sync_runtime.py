@@ -6,12 +6,14 @@ Manual and scheduled callers must explicitly authorize reconciliation.
 """
 
 from __future__ import annotations
+from functools import partial
 
 import asyncio
 from dataclasses import dataclass
 
 from .history import normalize_stream
 from .statistics_import import build_statistics
+from .timezone_support import home_assistant_timezone
 from .statistics_sync_recorder import sync_owned_statistics
 from .statistics_sync_plan import StatisticsSyncError
 from .statistics_sync_completion import wait_for_persisted_statistics
@@ -91,12 +93,9 @@ class MeterSyncRuntime:
             if stream.get("physical_meter_id") != meter_id:
                 raise StatisticsSyncError("Meter history identity mismatch")
             intervals = normalize_stream(stream, commodity=commodity)
-            batch = build_statistics(
-                meter_id,
-                commodity,
-                name,
-                intervals,
-                time_zone=hass.config.time_zone,
+            batch = await hass.async_add_executor_job(
+                partial(build_statistics, meter_id, commodity, name,
+                        intervals, local_tz=home_assistant_timezone())
             )
             plan = await sync_owned_statistics(
                 hass, batch, confirmed=True

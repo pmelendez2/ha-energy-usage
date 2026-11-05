@@ -6,12 +6,14 @@ Never queue writes. This preflight works on empty and populated statistics.
 """
 
 from __future__ import annotations
+from functools import partial
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 from .history import normalize_stream
 from .statistics_import import build_statistics
+from .timezone_support import home_assistant_timezone
 from .statistics_sync_plan import plan_statistics_sync, StatisticsSyncError
 from .statistics_sync_recorder import (
     read_owned_statistics,
@@ -52,9 +54,9 @@ async def assess_meter(hass, api, meter, *, read_statistics=None):
     if stream.get("physical_meter_id") != meter_id:
         raise StatisticsSyncError("Canonical meter identity mismatch")
     intervals = normalize_stream(stream, commodity=commodity)
-    batch = build_statistics(
-        meter_id, commodity, name, intervals,
-        time_zone=hass.config.time_zone,
+    batch = await hass.async_add_executor_job(
+        partial(build_statistics, meter_id, commodity, name,
+                intervals, local_tz=home_assistant_timezone())
     )
     earliest = datetime(1970, 1, 1, tzinfo=timezone.utc)
     latest = max(datetime.now(timezone.utc), batch.rows[-1]["start"])

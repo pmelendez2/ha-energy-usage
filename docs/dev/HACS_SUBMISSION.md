@@ -5,11 +5,11 @@
 
 **Purpose:** Track external HACS catalog requirements and evidence
 
-**Status:** PR #12817 open; awaiting maintainer review
+**Status:** PR #12817 open; changes requested; v0.1.5 not published
 
-**Release:** 0.1.4
+**Release:** 0.1.5
 
-**Last Updated:** 2026-10-29
+**Last Updated:** 2026-11-04
 
 Installing through a custom HACS repository is already validated; being
 listed in the **default HACS catalog** requires external review. This is
@@ -25,7 +25,7 @@ not Home Assistant Core inclusion or an official Home Assistant endorsement.
 - [x] HACS Action and hassfest passed on the release pull request.
 - [x] Production custom-repository install and runtime graphs verified
   on `piha`, 2026-10-26.
-- [ ] Confirm GitHub repo description, topics, and Issues enabled.
+- [x] Confirm GitHub repo description, topics, and Issues enabled (2026-11-04).
 - [x] Local `custom_components/energy_usage/brand/icon.png` and
   `icon@2x.png` included.
 - [ ] Confirm the **Brands** check on the actual `hacs/default` PR.
@@ -36,6 +36,14 @@ not Home Assistant Core inclusion or an official Home Assistant endorsement.
 - [x] Submit `pmelendez2/ha-energy-usage` to `hacs/default` through
   [PR #12817](https://github.com/hacs/default/pull/12817).
 - [x] All 13 PR validation checks passed on 2026-10-28.
+- [ ] Verify all three Frenck review findings against v0.1.5:
+  asynchronous timezone resolution, portable Explorer statistics/date defaults,
+  and opt-in synchronization plus utility-neutral gas imports.
+- [ ] Test Explorer with arbitrary meter IDs, electricity-only, gas-only,
+  and multiple meters in a live Home Assistant instance.
+- [ ] Rerun HACS Action and Hassfest against the published v0.1.5 release.
+- [ ] Verify upgrade and rollback in production.
+- [ ] Re-request review on the existing PR after publishing v0.1.5.
 - [ ] Await HACS maintainer review and approval.
 - [ ] Confirm the integration appears after the HACS catalog scan.
 

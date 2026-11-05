@@ -31,13 +31,16 @@ spec = importlib.util.spec_from_file_location(
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
+from datetime import timezone
+module.home_assistant_timezone = lambda: timezone.utc
 
 
 class SyncRuntimeTests(IsolatedAsyncioTestCase):
     def setUp(self):
         self.runtime = module.MeterSyncRuntime()
         self.hass = SimpleNamespace(
-            config=SimpleNamespace(time_zone="America/Los_Angeles")
+            config=SimpleNamespace(time_zone="America/Los_Angeles"),
+            async_add_executor_job=lambda fn, *args: asyncio.to_thread(fn, *args)
         )
         self.meter = {"id": 1, "commodity": 1,
                       "display_name": "Electric"}

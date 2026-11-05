@@ -31,7 +31,7 @@ const entries = [
   {start:Date.parse('2026-03-11T06:59:00Z'),change:5},
 ];
 context.sample = entries;
-const srcGas='SOURCES[1]', srcElectric='SOURCES[0]';
+const srcGas='SOURCE_TYPES[1]', srcElectric='SOURCE_TYPES[0]';
 let result = f(`bucketize(sample,"America/Los_Angeles", "2026-03-07", "2026-03-11", "month", "average", ${srcGas})`);
 assert.equal(result.length, 1);
 assert.equal(result[0].value, 10/3);
@@ -73,19 +73,19 @@ context.observations = {
     {start:Date.parse('2026-10-07T12:00:00Z'), change: 1},
   ],
 };
-assert.equal(f('newestObservation(observations, "America/Los_Angeles")'), '2026-10-09');
-assert.equal(f('newestObservation({}, "America/Los_Angeles")'), null);
+assert.equal(f('newestObservation(observations, "America/Los_Angeles", [{id:"energy_usage:electricity_meter_1"},{id:"energy_usage:gas_meter_2"}])'), '2026-10-09');
+assert.equal(f('newestObservation({}, "America/Los_Angeles", [])'), null);
 console.log('Explorer update: 10 additional checks PASS');
 assert.equal(f('shortTick("2026-10", "month")'), "Oct '26");
 assert.equal(f('shortTick("2026-10-05", "day")'), 'Oct 05');
 assert.equal(f('shortTick("2026-10-05 21:00 GMT-7", "hour")'), '21:00');
-assert.equal(f('calculationLabel("total", "day", SOURCES[0])'),
+assert.equal(f('calculationLabel("total", "day", SOURCE_TYPES[0])'),
   'Total consumption per day');
-assert.equal(f('calculationLabel("average", "month", SOURCES[1])'),
+assert.equal(f('calculationLabel("average", "month", SOURCE_TYPES[1])'),
   'Average consumption per observed day');
-assert.equal(f('calculationLabel("average", "day", SOURCES[0])'),
+assert.equal(f('calculationLabel("average", "day", SOURCE_TYPES[0])'),
   'Average consumption per observed hour');
-assert.equal(f('calculationLabel("average", "day", SOURCES[1])'),
+assert.equal(f('calculationLabel("average", "day", SOURCE_TYPES[1])'),
   'Observed daily consumption');
 console.log('Axis labels and calculation explanations: 7 checks PASS');
 
@@ -103,7 +103,7 @@ assert.equal(result[0].denominator,2);
 assert.equal(result[0].value,1);
 assert.equal(result[0].count,2);
 assert.equal(result[0].coverage,'2 observed hours');
-assert.match(f('calculationLabel("total", "hour", SOURCES[1])'),
+assert.match(f('calculationLabel("total", "hour", SOURCE_TYPES[1])'),
   /No hourly gas/);
 assert.match(source, /chartSvg.addEventListener\("click",event =>/);
 assert.match(source, /chartSvg.addEventListener\("keydown",event =>/);
@@ -128,3 +128,26 @@ assert.match(source, /delete view\._selectedIndex/);
 assert.match(source, /rect\.addEventListener\("click"/);
 assert.match(source, /dot\.addEventListener\("click"/);
 console.log('Persistent selection and direct SVG clicks: 6 checks PASS');
+
+// Reviewer regression: arbitrary meter IDs, missing commodities, and dates.
+assert.equal(f('discoveredSources([{statistic_id:"energy_usage:electricity_meter_37"}]).length'),1);
+assert.equal(f('discoveredSources([{statistic_id:"energy_usage:gas_meter_8"}])[0].id'),"energy_usage:gas_meter_8");
+assert.equal(f('discoveredSources([{statistic_id:"other:gas_meter_2"}]).length'),0);
+assert.equal(f('discoveredSources([{statistic_id:"energy_usage:gas_meter_8"},{statistic_id:"energy_usage:gas_meter_9"}]).length'),2);
+assert.equal(f('configuredSources({gas_statistic:"energy_usage:gas_meter_9"}).length'),1);
+assert.equal(f('initialDates(new Date("2026-11-04T12:00:00Z"),"UTC").end'),"2026-11-04");
+assert.equal(f('initialDates(new Date("2026-11-04T12:00:00Z"),"UTC").start'),"2026-10-06");
+console.log('HACS Explorer portability: 7 checks PASS');
+
+// Recorder expects the measurement type, not the statistics source.
+assert.match(source, /type:"recorder\/list_statistic_ids", statistic_type:"sum"/);
+assert.doesNotMatch(source, /statistic_type:"external"/);
+console.log("Recorder statistic discovery contract: 2 checks PASS");
+
+// Latest actual observation updates both navigation controls.
+const latestMethod = source.slice(source.indexOf('  async _useLatest() {'),
+  source.indexOf('  async _resolveSources() {'));
+assert.match(latestMethod, /this\._endInput\.value=latest;/);
+assert.match(latestMethod, /this\._dayInput\.value=latest;/);
+assert.match(latestMethod, /End date and hourly jump date updated/);
+console.log('Latest-date navigation consistency: 3 checks PASS');
