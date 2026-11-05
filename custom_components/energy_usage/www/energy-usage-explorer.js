@@ -21,10 +21,40 @@ function explorerLabel(key) {
   return EXPLORER_LABELS[key] ?? key;
 }
 
-const SOURCES = [
-  { id: "energy_usage:electricity_meter_1", name: "Electricity", unit: "kWh", granularity: "hour" },
-  { id: "energy_usage:gas_meter_2", name: "Natural Gas", unit: "therm", granularity: "day" },
+const SOURCE_TYPES = [
+  { name: "Electricity", unit: "kWh", granularity: "hour" },
+  { name: "Natural Gas", unit: "thm", granularity: "day" },
 ];
+// The recorder metadata, not a developer's physical meter numbers, defines
+// which statistics exist in this Home Assistant installation.
+function configuredSources(config = {}) {
+  const explicit = [
+    ["electricity_statistic", SOURCE_TYPES[0]],
+    ["gas_statistic", SOURCE_TYPES[1]],
+  ];
+  return explicit.filter(([key]) => typeof config[key] === "string" &&
+    /^energy_usage:(electricity|gas)_meter_[0-9]+$/.test(config[key]))
+    .map(([key, type]) => ({...type, id:config[key]}));
+}
+function discoveredSources(metadata) {
+  if (!Array.isArray(metadata)) return [];
+  const seen = new Set();
+  return metadata.map(item => {
+    const id = item.statistic_id;
+    const match = typeof id === "string" &&
+      /^energy_usage:(electricity|gas)_meter_[0-9]+$/.exec(id);
+    if (!match || seen.has(id)) return null;
+    seen.add(id);
+    const type = match[1] === "electricity" ? SOURCE_TYPES[0] : SOURCE_TYPES[1];
+    return {...type, id, name: `${type.name} (meter ${id.split("_").pop()})`};
+  }).filter(Boolean).sort((a,b) => a.id.localeCompare(b.id));
+}
+function initialDates(now = new Date(), timeZone = "UTC") {
+  const end = parts(now, timeZone).day;
+  const start = new Date(`${end}T00:00:00Z`);
+  start.setUTCDate(start.getUTCDate() - 29);
+  return {start:start.toISOString().slice(0,10), end};
+}
 const css = `
 :host { display:block; font-family:var(--primary-font-family, sans-serif); }
 .wrapper { padding:18px; }
@@ -102,9 +132,9 @@ function validSelection(start, end, period) {
     return "For hourly charts, select at most 32 calendar days.";
   return null;
 }
-function newestObservation(response, timeZone) {
+function newestObservation(response, timeZone, sources = []) {
   let latest = null;
-  for (const source of SOURCES) {
+  for (const source of sources) {
     for (const entry of response[source.id] || []) {
       if (!Number.isFinite(entry.start) ||
           !Number.isFinite(entry.change)) continue;
@@ -384,7 +414,9 @@ class EnergyUsageExplorer extends HTMLElement {
     super();
     this.attachShadow({mode:"open"});
     this._cfg={}; this._cache=null; this._hass=null; this._generation=0;
-    this._start="2025-09-07"; this._end="2026-10-06";
+    const dates=initialDates();
+    this._start=dates.start; this._end=dates.end;
+    this._sources=[]; this._sourcesResolved=false; this._explicitDates=false;
     this._period="month"; this._chart="bar"; this._metric="total";
     this._renderShell();
     this._lastChartWidth = 0;
@@ -404,14 +436,18 @@ class EnergyUsageExplorer extends HTMLElement {
   }
   _redraw() {
     if (!this._series) return;
-    for (let i=0;i<SOURCES.length;i++) {
-      const src=SOURCES[i];
+    for (let i=0;i<this._sources.length;i++) {
+      const src=this._sources[i];
       graph(this._graphs[i],this._series[i],src,
         this._chart,this._period,this._metric);
     }
   }
   setConfig(config) {
     this._cfg=config;
+    this._explicitDates=Boolean(config.start_date || config.end_date);
+    this._sources=configuredSources(config);
+    this._sourcesResolved=this._sources.length > 0;
+    this._cache=null;
     this._start=config.start_date || this._start;
     this._end=config.end_date || this._end;
     this._renderShell();
@@ -420,6 +456,17 @@ class EnergyUsageExplorer extends HTMLElement {
   set hass(hass) {
     const changed = this._hass && this._hass.connection !== hass.connection;
     this._hass=hass;
+    if (!this._explicitDates && !this._cache) {
+      const dates=initialDates(new Date(),hass.config?.time_zone || "UTC");
+      this._start=dates.start; this._end=dates.end;
+      this._startInput.value=this._start;
+      this._endInput.value=this._end;
+      this._dayInput.value=this._end;
+    }
+    if (changed && !configuredSources(this._cfg).length) {
+      this._sourcesResolved=false;
+      this._sources=[];
+    }
     if ((changed || !this._cache) && !this._loading) this._load();
   }
   getCardSize() { return 10; }
@@ -496,7 +543,7 @@ class EnergyUsageExplorer extends HTMLElement {
       {class:"availability"}); root.append(this._availability);
     this._status=el("div","",{class:"status"}); root.append(this._status);
     this._graphs=[];
-    for (const source of SOURCES) {
+    for (const source of this._sources) {
       const section=el("section",null,{class:"graph"});
       section.append(el("h3",`${source.name} (${source.unit})`));
       const note=el("div",source.granularity === "day" ?
@@ -530,7 +577,7 @@ class EnergyUsageExplorer extends HTMLElement {
     return this._hass.callWS({type:"recorder/statistics_during_period",
       start_time:new Date(startMs).toISOString(),
       end_time:new Date(endMs).toISOString(),
-      statistic_ids:SOURCES.map(s=>s.id),period:"hour",types:["change"]});
+      statistic_ids:this._sources.map(s=>s.id),period:"hour",types:["change"]});
   }
   async _useLatest() {
     if (!this._hass) return;
@@ -544,16 +591,19 @@ class EnergyUsageExplorer extends HTMLElement {
       const today=parts(new Date(),zone).day;
       // Query only real Recorder observations, never infer freshness
       // from the wall clock or assume a last-import date.
+      await this._resolveSources();
+      if (!this._sources.length) throw new Error("No Energy Usage statistics found");
       const start=dateValid(this._startInput.value) &&
         this._startInput.value <= today ? this._startInput.value :
-        "2025-01-01";
+        initialDates(new Date(),zone).start;
       const response=await this._query(start,today);
       if (generation!==this._generation) return;
-      const latest=newestObservation(response,zone);
+      const latest=newestObservation(response,zone,this._sources);
       if (!latest) throw new Error("No recorded usage found in the search range");
       this._endInput.value=latest;
+      this._dayInput.value=latest;
       this._availability.textContent=`Latest recorded date: ${latest} (${zone})`;
-      this._status.textContent="End date updated. Click Apply to refresh graphs.";
+      this._status.textContent="End date and hourly jump date updated. Click Apply to refresh graphs.";
       this._status.classList.add("pending");
     } catch (err) {
       if (generation===this._generation) {
@@ -563,6 +613,18 @@ class EnergyUsageExplorer extends HTMLElement {
     } finally {
       if (generation===this._generation) this._loading=false;
     }
+  }
+  async _resolveSources() {
+    if (this._sourcesResolved) return;
+    const metadata=await this._hass.callWS({
+      type:"recorder/list_statistic_ids", statistic_type:"sum"
+    });
+    this._sources=discoveredSources(metadata);
+    this._sourcesResolved=true;
+    // Rebuild chart sections without discarding the user's pending dates.
+    this._start=this._startInput.value;
+    this._end=this._endInput.value;
+    this._renderShell();
   }
   async _load() {
     if (!this._hass) return;
@@ -579,16 +641,23 @@ class EnergyUsageExplorer extends HTMLElement {
     this._loading=true;
     try {
       const zone=this._hass.config?.time_zone || "UTC";
+      await this._resolveSources();
+      if (generation!==this._generation) return;
+      if (!this._sources.length) {
+        this._availability.textContent="No Energy Usage statistics discovered.";
+        this._status.textContent="Import usage data or configure electricity_statistic / gas_statistic.";
+        return;
+      }
       const response=await this._query(this._start,this._end);
       if (generation!==this._generation) return;
       this._cache=true;
-      this._series=SOURCES.map(s => bucketize(response[s.id] || [],
+      this._series=this._sources.map(s => bucketize(response[s.id] || [],
         zone,this._start,this._end,this._period,this._metric,s));
       this._redraw();
-      this._definition.textContent = SOURCES.map(source =>
+      this._definition.textContent = this._sources.map(source =>
         `${source.name}: ${calculationLabel(this._metric, this._period, source)}`
       ).join(" · ") + ". Values reflect observed readings only.";
-      const latest=newestObservation(response,zone);
+      const latest=newestObservation(response,zone,this._sources);
       this._availability.textContent=latest ?
         `Latest observation in selected range: ${latest} (${zone})` :
         "No actual observations in the selected range.";

@@ -5,6 +5,7 @@ Never replace existing series or silently modify historical statistics.
 """
 
 from __future__ import annotations
+from functools import partial
 import asyncio
 from datetime import date
 
@@ -33,6 +34,7 @@ from .history_import_guard import (
 from .history_range import complete_history_dates
 from .import_status import failed, key_for, queued, started
 from .statistics_import import StatisticsImportError, build_statistics
+from .timezone_support import home_assistant_timezone
 
 _LOGGER = logging.getLogger(__name__)
 SERVICE = "import_historical_usage"
@@ -59,7 +61,7 @@ async def async_import_complete_history(hass, entry, meter_id):
         meter = _find_meter(hass, entry, meter_id)
         stream = await api.stream(meter_id)
         start, end = complete_history_dates(
-            stream, int(meter["commodity"]), hass.config.time_zone
+            stream, int(meter["commodity"]), home_assistant_timezone()
         )
         await _import_range(hass, entry, meter, start, end)
     except (HistoryValidationError, StatisticsImportError,
@@ -123,15 +125,17 @@ async def _import_range(hass, entry, meter, start_day, end_day):
             async_get_clientsession(hass),
             entry.data[CONF_URL], entry.data[CONF_TOKEN],
         )
+        local_tz = home_assistant_timezone()
         begin, stop = selected_calendar_dates_utc(
-            start_day, end_day, hass.config.time_zone
+            start_day, end_day, local_tz
         )
         readings = await fetch_usage_history(
             api, meter_id, commodity, begin, stop
         )
-        batch = build_statistics(
-            meter_id, commodity, meter["display_name"], readings,
-            time_zone=hass.config.time_zone,
+        batch = await hass.async_add_executor_job(
+            partial(build_statistics, meter_id, commodity,
+                    meter["display_name"], readings,
+                    local_tz=local_tz)
         )
         metadata = StatisticMetaData(
             has_sum=True,

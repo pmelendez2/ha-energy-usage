@@ -1,3 +1,4 @@
+from zoneinfo import ZoneInfo
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 Project Contributors
 """Check guided-import date selection with no Home Assistant runtime."""
@@ -51,7 +52,7 @@ class HistoryRangeTests(unittest.TestCase):
         last = datetime(2026, 10, 7, 6, tzinfo=timezone.utc)
         self.assertEqual(
             tuple(map(str, complete_history_dates(
-                stream([first, last]), 1, "America/Los_Angeles"
+                stream([first, last]), 1, ZoneInfo("America/Los_Angeles")
             ))),
             ("2025-09-07", "2026-10-06"),
         )
@@ -63,7 +64,7 @@ class HistoryRangeTests(unittest.TestCase):
         ]
         self.assertEqual(
             tuple(map(str, complete_history_dates(
-                stream(days, 7), 7, "America/Los_Angeles"
+                stream(days, 7), 7, ZoneInfo("America/Los_Angeles")
             ))),
             ("2025-09-07", "2026-10-06"),
         )
@@ -72,17 +73,17 @@ class HistoryRangeTests(unittest.TestCase):
         data = stream([])
         data["resolved"] = False
         with self.assertRaises(HistoryValidationError):
-            complete_history_dates(data, 1, "UTC")
+            complete_history_dates(data, 1, timezone.utc)
 
     def test_empty_rejected(self):
         with self.assertRaises(HistoryValidationError):
-            complete_history_dates(stream([]), 1, "UTC")
+            complete_history_dates(stream([]), 1, timezone.utc)
 
     def test_more_than_441_days_rejected(self):
         first = datetime(2025, 1, 1, tzinfo=timezone.utc)
         last = first + timedelta(days=441)
         with self.assertRaises(HistoryValidationError):
-            complete_history_dates(stream([first, last]), 1, "UTC")
+            complete_history_dates(stream([first, last]), 1, timezone.utc)
 
 
 if __name__ == "__main__":

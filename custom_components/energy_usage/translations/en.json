@@ -72,6 +72,7 @@
         "title": "Automatic synchronization",
         "description": "Registered physical meters: {meters}. Choose how often to check Energy Ingest for accepted usage and corrections. Meter associations are managed during guided import. Changes take effect when saved.",
         "data": {
+          "sync_enabled": "Enable automatic synchronization",
           "sync_interval_hours": "Synchronization frequency",
           "sync_on_startup": "Synchronize after Home Assistant starts"
         }

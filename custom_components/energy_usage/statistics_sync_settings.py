@@ -2,10 +2,12 @@
 # Copyright (c) 2026 Project Contributors
 """User-owned scheduling preferences for canonical usage reconciliation."""
 
+CONF_SYNC_ENABLED = "sync_enabled"
+DEFAULT_SYNC_ENABLED = False
 CONF_SYNC_HOURS = "sync_interval_hours"
 CONF_SYNC_STARTUP = "sync_on_startup"
 DEFAULT_SYNC_HOURS = 24
-DEFAULT_SYNC_STARTUP = True
+DEFAULT_SYNC_STARTUP = False
 SYNC_INTERVAL_CHOICES = {
     6: "Every 6 hours",
     12: "Every 12 hours",
@@ -17,10 +19,13 @@ SYNC_INTERVAL_CHOICES = {
 def sync_preferences(entry):
     """Return validated preferences, defaulting older installations."""
     options = entry.options
+    enabled = options.get(CONF_SYNC_ENABLED, DEFAULT_SYNC_ENABLED)
+    if type(enabled) is not bool:
+        raise ValueError("Invalid automatic synchronization setting")
     hours = options.get(CONF_SYNC_HOURS, DEFAULT_SYNC_HOURS)
     if type(hours) is not int or hours not in SYNC_INTERVAL_CHOICES:
         raise ValueError("Unsupported synchronization interval")
     startup = options.get(CONF_SYNC_STARTUP, DEFAULT_SYNC_STARTUP)
     if type(startup) is not bool:
         raise ValueError("Invalid startup synchronization setting")
-    return hours, startup
+    return enabled, hours, startup

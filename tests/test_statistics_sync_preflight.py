@@ -34,6 +34,8 @@ for part in ("history", "statistics_import", "statistics_sync_plan",
 from custom_components.energy_usage.statistics_sync_preflight import (
     assess_meter,
 )
+import custom_components.energy_usage.statistics_sync_preflight as preflight_module
+preflight_module.home_assistant_timezone = lambda: timezone.utc
 from custom_components.energy_usage.statistics_sync_plan import (
     StatisticsSyncError,
 )
@@ -70,7 +72,8 @@ class FakeApi:
 class PreflightTests(unittest.TestCase):
     def setUp(self):
         self.hass = SimpleNamespace(
-            config=SimpleNamespace(time_zone="America/Los_Angeles")
+            config=SimpleNamespace(time_zone="America/Los_Angeles"),
+            async_add_executor_job=lambda fn, *args: asyncio.to_thread(fn, *args)
         )
         self.meter = {
             "id": 1, "commodity": 1, "display_name": "Electric"

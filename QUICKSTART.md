@@ -5,9 +5,9 @@
 
 **Purpose:** Install and display electricity and gas usage simply.
 
-**Status:** v0.1.4 release preparation
+**Status:** v0.1.5 release preparation
 
-**Release:** 0.1.4
+**Release:** 0.1.5
 
 **Last Updated:** 2026-11-04
 
@@ -37,6 +37,17 @@ On your Energy Ingest host, display the generated token by following
 only its value into the **API bearer token** field. Home Assistant should discover
 your electricity and gas meters. The URL must be reachable from the Home
 Assistant container; `localhost` usually refers to the wrong container.
+
+### Optional: enable scheduled synchronization
+
+Scheduled synchronization is **disabled by default**. To opt in, open
+**Settings → Devices & services → Integrations → Energy Usage → Configure**,
+enable **Automatic synchronization**, choose every **6**, **12**, or **24 hours**
+(default), or **7 days**, and optionally enable **Synchronize on startup**.
+Startup synchronization is off by default. The interval is not a fixed
+clock time. See [INSTALLATION.md](INSTALLATION.md#choose-whether-to-enable-automatic-synchronization)
+for the complete instructions. The Utility Card's confirmed-import
+synchronization works independently of this optional schedule.
 
 ## 3. Import or synchronize existing history
 

@@ -7,8 +7,7 @@ No missing data is synthesized; no data is written by this module.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, time, timedelta, timezone
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from datetime import datetime, time, timedelta, timezone, tzinfo
 from decimal import Decimal
 from typing import Sequence
 
@@ -36,7 +35,7 @@ def build_statistics(
     meter_name: str,
     intervals: Sequence[UsageInterval],
     *,
-    time_zone: str = "UTC",
+    local_tz: tzinfo,
 ) -> StatisticsBatch:
     """Prepare ordered statistics; preserve every missing interval as absent.
 
@@ -57,10 +56,8 @@ def build_statistics(
     total = Decimal(0)
     previous_end: datetime | None = None
     previous_gas_date = None
-    try:
-        local_tz = ZoneInfo(time_zone)
-    except (ZoneInfoNotFoundError, ValueError) as exc:
-        raise StatisticsImportError("Invalid time zone") from exc
+    if not isinstance(local_tz, tzinfo):
+        raise StatisticsImportError("A configured time zone object is required")
     missing = 0
     rows: list[dict] = []
     for reading in sorted(intervals, key=lambda r: r.start_utc):
@@ -76,12 +73,9 @@ def build_statistics(
             raise StatisticsImportError("Hourly electricity not aligned")
         if commodity == 7:
             local = start.astimezone(local_tz)
-            # SDG&E labels daily gas readings at 23:59 local time.
-            # This mapping affects display only, never source readings.
-            if (local.hour, local.minute, local.second) != (23, 59, 0):
-                raise StatisticsImportError(
-                    "Unexpected daily gas reporting boundary"
-                )
+            # Assign each accepted daily gas reading to its local date.
+            # Do not require one utility company's 23:59 timestamp.
+            # Canonical source timestamps and values remain unchanged.
             gas_date = local.date()
             display_start = datetime.combine(
                 gas_date, time.min, local_tz

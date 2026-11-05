@@ -1,16 +1,16 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Install and configure Energy Usage for Home Assistant
 
-**Start here:** This guide covers the upcoming v0.1.4 installation,
+**Start here:** This guide covers the upcoming v0.1.5 installation,
 including guided initial import and advanced validation procedures.
 
 **Audience:** Users and administrators
 
 **Purpose:** Guide first-time installation and usage-history import.
 
-**Status:** v0.1.4 release preparation
+**Status:** v0.1.5 release preparation
 
-**Release:** 0.1.4
+**Release:** 0.1.5
 
 **Last Updated:** 2026-11-04
 
@@ -18,9 +18,9 @@ This guide installs **Energy Usage** as a Home Assistant **custom integration**,
 imports electricity and gas usage through the Utility Card, configures the
 built-in Energy Dashboard, and optionally adds the Explorer card.
 
-**Release scope:** v0.1.4 includes guided utility data import.
+**Release scope:** v0.1.5 includes guided utility data import.
 Energy Ingest 0.1.9 is required.
-The utility upload card is included in Energy Usage 0.1.4.
+The utility upload card is included in Energy Usage 0.1.5.
 Default HACS catalog inclusion is a separate approval process.
 
 ## 1. Prerequisites
@@ -159,6 +159,30 @@ If authentication fails after an Energy Ingest reinstall or token rotation,
 reauthenticate / reconfigure the integration with the **new** token before
 attempting historical imports. Do not delete Recorder data to fix API auth.
 
+### Choose whether to enable automatic synchronization
+
+**Automatic scheduled synchronization is off by default in v0.1.5.**
+After adding the integration, opt in if you want Energy Usage to periodically
+reconcile accepted electricity and natural gas observations with Home Assistant
+Recorder. The integration does not turn on its schedule automatically.
+
+1. Open **Settings → Devices & services → Integrations → Energy Usage**.
+2. Open the integration's **Configure** options (the menu location varies by
+   Home Assistant version).
+3. Turn on **Automatic synchronization** to opt in.
+4. Choose a **Synchronization interval**: every **6 hours**, **12 hours**,
+   **24 hours** (the default selection), or **7 days**.
+5. Optionally turn on **Synchronize on startup** if you also want a run after
+   Home Assistant starts. This option is off by default.
+6. Submit/save the options. Return here to change the interval or turn off
+   automatic synchronization at any time.
+
+The interval is a **frequency**, not a fixed clock time. Leaving automatic
+synchronization disabled does not prevent manually initiated imports or the
+Utility Card's confirmed-import synchronization workflow described below.
+Automatic synchronization uses only accepted utility observations; missing
+readings remain missing and existing corrections are reconciled safely.
+
 ## 4. Check the source and meters
 
 Run the [read-only production checks](#confirm-energy-ingest-data-is-ready)
@@ -180,7 +204,7 @@ reading is missing data and must **not** be replaced with zero.
 
 ## 5. Add the Utility Card and import Green Button XML
 
-The Utility Card ships with Energy Usage v0.1.4. It is not automatically
+The Utility Card ships with Energy Usage v0.1.5. It is not automatically
 added to the Energy Dashboard or the Home Assistant card picker. You must
 register its JavaScript resource and add a Manual card.
 
@@ -372,6 +396,21 @@ copy into `/config/www` is required.
    ```yaml
    type: custom:energy-usage-explorer
    ```
+
+   Explorer automatically discovers available `energy_usage:` statistics from
+   Home Assistant Recorder, including electricity-only or gas-only setups and
+   multiple physical meters. Alternatively, specify one or both statistic IDs
+   explicitly (substitute IDs shown under **Tools → Statistics**):
+
+   ```yaml
+   type: custom:energy-usage-explorer
+   electricity_statistic: energy_usage:electricity_meter_7
+   gas_statistic: energy_usage:gas_meter_12
+   ```
+
+   The initial date range is the most recent 30 local calendar days, using
+   Home Assistant's configured timezone. Select **Use latest available** to
+   locate recorded observations; dates without readings remain empty.
 
 3. Save and refresh. The resource URL should return HTTP 200. Verify hourly
    bars, line charts, date navigation, and selected-reading details.

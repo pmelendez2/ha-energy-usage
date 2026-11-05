@@ -23,7 +23,7 @@ class SyncOptionsTests(unittest.TestCase):
                                 "SYNC_INTERVAL_CHOICES"):
                         values[name] = ast.literal_eval(node.value)
         self.assertEqual(values["DEFAULT_SYNC_HOURS"], 24)
-        self.assertTrue(values["DEFAULT_SYNC_STARTUP"])
+        self.assertFalse(values["DEFAULT_SYNC_STARTUP"])
         self.assertEqual(set(values["SYNC_INTERVAL_CHOICES"]),
                          {6, 12, 24, 168})
 
@@ -46,6 +46,7 @@ class SyncOptionsTests(unittest.TestCase):
         english = json.loads((BASE / "translations/en.json").read_text())
         self.assertEqual(strings, english)
         fields = strings["options"]["step"]["init"]["data"]
+        self.assertIn("sync_enabled", fields)
         self.assertIn("sync_interval_hours", fields)
         self.assertIn("sync_on_startup", fields)
         self.assertIn("{meters}",

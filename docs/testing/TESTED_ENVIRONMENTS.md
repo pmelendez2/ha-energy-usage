@@ -7,7 +7,7 @@
 
 **Status:** v0.1.4 preparation; production upgrade not yet verified
 
-**Release:** 0.1.4
+**Release:** 0.1.5
 
 **Last Updated:** 2026-10-23
 

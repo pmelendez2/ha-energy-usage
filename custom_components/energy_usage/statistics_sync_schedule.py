@@ -37,7 +37,7 @@ class AutomaticSync:
         self._unsubscribers = []
         self._startup_unsubscribe = None
         self._stopped = False
-        self.interval_hours, self.sync_on_startup = (
+        self.enabled, self.interval_hours, self.sync_on_startup = (
             sync_preferences(entry)
         )
 
@@ -108,7 +108,7 @@ class AutomaticSync:
     def start(self):
         """Schedule the user-selected cycle and optional startup run."""
         _LOGGER.info(
-            "Energy Usage scheduler started: interval=%dh "
+            "Automatic Energy Usage synchronization enabled: interval=%dh "
             "startup=%s",
             self.interval_hours,
             self.sync_on_startup,
@@ -164,6 +164,9 @@ def start_automatic_sync(hass, entry, runtime):
     if entry.entry_id in _SCHEDULES:
         return
     schedule = AutomaticSync(hass, entry, runtime)
+    if not schedule.enabled:
+        _LOGGER.info("Automatic Energy Usage synchronization disabled")
+        return
     schedule.start()
     _SCHEDULES[entry.entry_id] = schedule
 
