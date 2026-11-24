@@ -22,8 +22,9 @@ def check() -> list[str]:
     ci = (WORKFLOWS / "ci.yml").read_text(encoding="utf-8")
     # Keep the always-present branch-protection context and detection steps.
     for token in ("  isolated:", "    name: isolated", "id: scope",
-                  "scripts/ci_change_scope.py", "scripts/check_ci_workflows.py",
-                  "scripts/check_documentation.py", "git diff --check"):
+                  "scripts/ci_change_scope.py",
+                  "scripts/verify-release.sh",
+                  "VERIFY_RELEASE_CHANGE_BASE"):
         if token not in ci:
             errors.append(f"ci.yml: missing required gate: {token}")
     for name in ("compatibility.yml", "hacs-validation.yml"):
