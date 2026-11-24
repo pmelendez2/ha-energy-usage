@@ -98,6 +98,10 @@ for path in files:
         errors.append(f'{path.relative_to(ROOT)}: obsolete release: '
                       f'{match.group(0)}')
 
+# Validate issue references in the current release's CHANGELOG section.
+from check_issue_links import validate as validate_issue_links
+errors.extend(validate_issue_links(ROOT))
+
 if errors:
     print('\n'.join(errors))
     raise SystemExit(f'Documentation: FAIL ({len(errors)} issues)')
