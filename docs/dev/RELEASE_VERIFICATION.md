@@ -13,29 +13,39 @@
 
 ## Local verification
 
-Run from the `ha-energy-usage` repository root. Install the test
-dependencies listed in `.github/workflows/ci.yml` before
-running the unit tests; no maintainer-specific directories are used:
+Run from the repository root with Python 3.13 or 3.14, Node.js, Git,
+Bash, and the test dependencies used by the standard CI environment
+(`python3 -m pip install aiohttp PyYAML`):
 
 ```bash
-python3 -m unittest discover -s tests -p 'test_*.py'
-python3 -m compileall -q custom_components/energy_usage tests
-python3 scripts/check_integration.py
-python3 scripts/package_release.py --output build/ha-energy-usage.zip
-python3 scripts/check_release_package.py build/ha-energy-usage.zip
-node --check custom_components/energy_usage/www/energy-usage-explorer.js
-node tests/test-energy-usage-explorer.cjs
-python3 scripts/check_documentation.py
-python3 scripts/manage_doc_versions.py --check
-python3 -m unittest discover -s tests -p 'test_doc_policy.py'
-git diff --check
+bash scripts/verify-release.sh
 ```
 
-The CI `isolated` job runs the standard-library test and package checks;
-These commands use Python, Node.js, and files shipped in the
-repository. The independent Python compatibility matrix covers
-3.13 and 3.14. Neither constitutes a real
-Home Assistant runtime integration test.
+The runner checks both independently maintained current versions and tagged
+references, documentation links and policy, CI contracts, integration metadata,
+Python compilation and regressions, Explorer JavaScript syntax and tests,
+release ZIP packaging and ZIP integrity/version, and Git whitespace.
+It prints each check and stops at the first failure. The generated, ignored
+artifact is `build/ha-energy-usage.zip` under the repository root.
+
+The command is safe to rerun from any directory and with local uncommitted
+changes. It does not change source or version metadata, publish, commit,
+push, or perform a Git history security scan. Run the separate
+`bash scripts/check-publication.sh` **after committing** and before pushing;
+that gate requires a clean tree and scans Git history for secrets.
+
+The CI `isolated` job invokes the same script with the classified scope:
+full for source or unknown changes, docs for documentation-only changes,
+and workflow for workflow-only changes. Documentation and version checks
+always run; full mode additionally runs code tests and release packaging.
+The required `isolated` check is always present. HACS/Hassfest and the Python
+compatibility matrix remain separate workflows. Passing source checks does
+not establish live Home Assistant runtime acceptance.
+
+The unified verification runner includes
+`python3 scripts/check_documentation.py` to validate documentation
+metadata, release consistency, and local links. This check is executed
+by the runner and does not need to be invoked separately.
 
 ## Development runtime acceptance
 
@@ -52,14 +62,16 @@ in [Test Plan](../testing/TEST_PLAN.md) and the outcomes in
 
 ## Publishing
 
-Use a feature branch and signed commits, then a pull request and required
-CI checks before merging into protected `main`. GitHub release tags must
+Run `bash scripts/verify-release.sh` before committing. After committing,
+run `bash scripts/check-publication.sh` to verify a clean tree and scan
+Git history for secrets, then push the feature branch. Use signed commits,
+a pull request, and required CI checks before merging into protected `main`. GitHub release tags must
 match the `manifest.json` version. For HACS installation use the GitHub
 repository; the component-only ZIP is an optional manual-install artifact.
 
 ## Runtime acceptance and historical evidence
 
-Run automated checks using the commands in **Local verification**.
+Run automated checks using `bash scripts/verify-release.sh`.
 The full lifecycle, Recorder, and guided utility workflow acceptance
 scenarios are maintained in [Test Plan](../testing/TEST_PLAN.md).
 The guided workflow follows the accepted

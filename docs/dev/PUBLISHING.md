@@ -32,7 +32,7 @@ in the repository. HACS default-catalog acceptance was confirmed by
 merged November 9, 2026; this is not Home Assistant Core inclusion.
 
 The maintainer's [HACS submission checklist](HACS_SUBMISSION.md)
-records the completed catalog application and remaining runtime checks.
+records the completed catalog application and compatibility evidence.
 
 **Current limitations:** Explicit initial Recorder import is supported
 for previously empty statistic series. Correction-safe synchronization is
@@ -41,12 +41,12 @@ remains outstanding. Solar production/export ingestion is out of scope.
 
 ## Release gates
 
-- Run `python3 scripts/check_documentation.py` from the repository
-  root to check document locations, versions, installation examples,
-  Home Assistant dashboard setup, and links.
-- Run `bash scripts/check-publication.sh` after committing; it
-  also runs the documentation rules and their unit tests.
-- Verify Python and bundled Explorer tests, package contents, and documentation links.
+- Run `bash scripts/verify-release.sh` from the repository root for
+  version, documentation, Python, JavaScript, integration and package checks.
+- After a signed commit, run `bash scripts/check-publication.sh` on the
+  clean feature branch for security and Git history secret scanning.
+- Keep the required change-aware `isolated` CI check and independent HACS,
+  Hassfest and compatibility workflows enabled.
 - Run HACS Action and hassfest without ignored failures.
 - Confirm `manifest.json` version matches the intended signed release tag.
 - Publish a **full GitHub Release**, not only a Git tag.
