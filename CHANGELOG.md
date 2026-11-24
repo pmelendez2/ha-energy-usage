@@ -9,9 +9,9 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-04
+**Last Updated:** 2026-11-23
 
-## Unreleased — v0.1.5
+## 0.1.5 — Released (2026-11-05)
 
 ### Changed
 
@@ -25,9 +25,12 @@
 
 ### Verification
 
-- Source unit and contract tests pass; production/HACS review is pending.
+- Source tests and release checks passed; full production upgrade and
+  failure-recovery acceptance remains separately tracked.
+- HACS default-catalog inclusion was subsequently approved through
+  hacs/default PR #13425 (merged 2026-11-09).
 
-## Previously prepared — v0.1.4
+## 0.1.4 — Released (2026-11-04)
 
 ### Changed
 

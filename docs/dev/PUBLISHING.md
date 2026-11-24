@@ -9,27 +9,30 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-29
+**Last Updated:** 2026-11-23
 
 `ha-energy-usage` is a custom integration, not part of Home Assistant Core.
 
 1. Run local tests and GitHub Actions, including supported Home Assistant
    versions. Do not claim a version is tested without completing runtime tests.
-2. Commit and push the repository; create a version tag consistent with the
-   version in `custom_components/energy_usage/manifest.json`.
-3. Publish a GitHub Release for that tag. HACS can install custom integrations
-   from their GitHub repository after users add it as a custom repository.
-4. For manual installation, copy `custom_components/energy_usage/` into the
-   Home Assistant configuration's `custom_components/` directory and restart.
-5. Offer the repository for HACS default catalog inclusion only after meeting
-   its validation, documentation, and branding requirements.
+2. Create a signed commit on a feature/fix branch and merge through a PR
+   after required `isolated`, HACS, Hassfest, and compatibility checks.
+   Do not push source changes directly to protected `main`.
+3. Create a signed version tag matching `release/VERSION` and
+   `custom_components/energy_usage/manifest.json`; publish a full GitHub
+   Release with release notes and verified artifacts.
+4. The integration is in the default HACS catalog. Test installation by
+   searching for **Energy Usage** in HACS, without a custom repo step.
+5. For manual installation, copy `custom_components/energy_usage/` into
+   Home Assistant's `custom_components/` directory and restart.
 
-Local images under `custom_components/energy_usage/brand/` are included in
-the repository. The icon was approved by the maintainer before public
-release. HACS default-catalog acceptance is a separate review.
+Local images under `custom_components/energy_usage/brand/` are included
+in the repository. HACS default-catalog acceptance was confirmed by
+[hacs/default PR #13425](https://github.com/hacs/default/pull/13425),
+merged November 9, 2026; this is not Home Assistant Core inclusion.
 
 The maintainer's [HACS submission checklist](HACS_SUBMISSION.md)
-tracks the external application and outstanding checks.
+records the completed catalog application and remaining runtime checks.
 
 **Current limitations:** Explicit initial Recorder import is supported
 for previously empty statistic series. Correction-safe synchronization is
@@ -42,4 +45,4 @@ remains outstanding. Solar production/export ingestion is out of scope.
 - Run HACS Action and hassfest without ignored failures.
 - Confirm `manifest.json` version matches the intended signed release tag.
 - Publish a **full GitHub Release**, not only a Git tag.
-- Test HACS custom-repository installation before catalog submission.
+- Test a default HACS catalog download for every release candidate.

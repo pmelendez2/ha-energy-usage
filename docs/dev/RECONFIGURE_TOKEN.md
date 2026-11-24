@@ -11,12 +11,7 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-27
-
-**Purpose:** Describe the user-facing API token rotation workflow and
-its authentication safety requirements.
-
-**Intended Audience:** Maintainers and developers.
+**Last Updated:** 2026-11-23
 
 ## Configuration behavior
 

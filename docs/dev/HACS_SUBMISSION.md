@@ -3,57 +3,54 @@
 
 **Audience:** Developers and maintainers
 
-**Purpose:** Track external HACS catalog requirements and evidence
+**Purpose:** Record HACS catalog acceptance and outstanding validation.
 
-**Status:** PR #12817 open; changes requested; v0.1.5 not published
+**Status:** Accepted into default HACS catalog; partial production runtime verified
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-04
+**Last Updated:** 2026-11-23
 
-Installing through a custom HACS repository is already validated; being
-listed in the **default HACS catalog** requires external review. This is
-not Home Assistant Core inclusion or an official Home Assistant endorsement.
+## HACS catalog acceptance
 
-## Repository readiness
+The integration `pmelendez2/ha-energy-usage` was admitted to the default
+HACS integration catalog when
+[hacs/default PR #13425](https://github.com/hacs/default/pull/13425)
+merged on **November 9, 2026**. The integration is present in the catalog.
+The earlier [PR #12817](https://github.com/hacs/default/pull/12817)
+is historical submission/review context, not the active acceptance PR.
 
-- [x] Public source repository with a single integration in
-  `custom_components/energy_usage`.
-- [x] `hacs.json` supplies the display name and renders `README.md`.
-- [x] `manifest.json` provides the required integration metadata.
-- [x] Signed release tag and full GitHub Release published.
-- [x] HACS Action and hassfest passed on the release pull request.
-- [x] Production custom-repository install and runtime graphs verified
-  on `piha`, 2026-10-26.
-- [x] Confirm GitHub repo description, topics, and Issues enabled (2026-11-04).
-- [x] Local `custom_components/energy_usage/brand/icon.png` and
-  `icon@2x.png` included.
-- [ ] Confirm the **Brands** check on the actual `hacs/default` PR.
-  HACS documentation still references `home-assistant/brands`, while
-  newer submission checks may accept locally bundled branding.
-  If the check requires a Brands submission, complete that separately.
-- [x] Publish the v0.1.2 correction-safe synchronization release.
-- [x] Submit `pmelendez2/ha-energy-usage` to `hacs/default` through
-  [PR #12817](https://github.com/hacs/default/pull/12817).
-- [x] All 13 PR validation checks passed on 2026-10-28.
-- [ ] Verify all three Frenck review findings against v0.1.5:
-  asynchronous timezone resolution, portable Explorer statistics/date defaults,
-  and opt-in synchronization plus utility-neutral gas imports.
-- [ ] Test Explorer with arbitrary meter IDs, electricity-only, gas-only,
-  and multiple meters in a live Home Assistant instance.
-- [ ] Rerun HACS Action and Hassfest against the published v0.1.5 release.
-- [ ] Verify upgrade and rollback in production.
-- [ ] Re-request review on the existing PR after publishing v0.1.5.
-- [ ] Await HACS maintainer review and approval.
-- [ ] Confirm the integration appears after the HACS catalog scan.
+Users install by searching for **Energy Usage** directly within HACS.
+Custom-repository instructions are no longer required for new users.
+Catalog inclusion is distinct from Home Assistant Core inclusion and is
+not certification of every runtime deployment configuration.
 
-## Submission references
+## Current release and compatibility evidence
 
-- [HACS default repositories](https://www.hacs.dev/docs/publish/include/)
-- [HACS submission source](https://github.com/hacs/documentation/blob/main/source/docs/publish/include.md)
-- [HACS integration requirements](https://www.hacs.dev/docs/publish/integration/)
-- [HACS publisher requirements](https://www.hacs.dev/docs/publish/start/)
+- Energy Usage **v0.1.5** was published November 5, 2026.
+- Energy Ingest **v0.1.10** is the recommended current backend release.
+- Energy Ingest **v0.1.9-rc.3** was the recorded guided-import
+  interoperability test baseline; later stable v0.1.9 also exists.
+- On November 23, 2026, a production v0.1.10 plus v0.1.5 test verified
+  backend XML import, resource association, read-only preflight, and
+  append-only Recorder synchronization for electricity and gas.
+- Scheduled retries, actual corrections, API outages and rollback are
+  not fully accepted by this test.
+- Previous HACS, Hassfest, and Python CI successes are not a substitute for
+  production upgrade, rollback, outage, and restart acceptance.
+
+## Remaining acceptance tasks
+
+- [ ] Verify HACS default-catalog installation in a clean supported
+  Home Assistant environment.
+- [x] Record v0.1.10 + v0.1.5 production import/synchronization evidence.
+- [ ] Verify v0.1.10 correction handling, retries and outage recovery.
+- [ ] Verify production upgrade and rollback without altering Recorder history.
+- [ ] Complete documented failure-recovery and multi-meter test cases.
+
+## References
+
+- [HACS integration installation](https://www.hacs.xyz/docs/use/)
+- [HACS publishing requirements](https://www.hacs.dev/docs/publish/integration/)
 - [Home Assistant Brands](https://github.com/home-assistant/brands)
-
-Do not represent passing CI, a custom HACS installation, or this checklist
-as acceptance into the default HACS catalog.
+- [Release verification](RELEASE_VERIFICATION.md)

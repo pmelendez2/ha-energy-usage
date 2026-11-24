@@ -5,11 +5,11 @@
 
 **Purpose:** Install and display electricity and gas usage simply.
 
-**Status:** v0.1.5 release preparation
+**Status:** Published v0.1.5 quick start
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-04
+**Last Updated:** 2026-11-23
 
 **First:** Install Energy Ingest and its MariaDB database, register physical
 electricity and/or gas meters, and start its authenticated API. You need Home
@@ -19,14 +19,14 @@ integration; its database is not created by HACS.
 
 ## 1. Install from HACS
 
-1. In HACS, open **Custom repositories** from the three-dot menu.
-2. Add `https://github.com/pmelendez2/ha-energy-usage` as **Integration**.
-   If it is already listed, do not add it again.
-3. Open **Energy Usage**, download the latest compatible **published** release,
-   and restart Home Assistant.
+1. In **HACS**, search the default catalog for **Energy Usage**.
+2. Open **Energy Usage** and download the latest compatible published
+   release (v0.1.5 at this documentation update).
+3. Restart Home Assistant. A custom repository is not required.
 
-Energy Usage is a HACS custom repository until accepted into the default
-catalog. Do not install an unreleased version from this guide.
+Install the separately deployed **Energy Ingest v0.1.10** backend first
+(recommended). The earlier v0.1.9 backend is the recorded integration
+interoperability baseline; v0.1.10 also passed the recorded production sync test.
 
 ## 2. Connect your Energy Ingest server
 
