@@ -13,8 +13,31 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: classify HACS changes
+    runs-on: ubuntu-latest
+    outputs:
+      scope: ${{ steps.scope.outputs.scope }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Classify changed paths
+        id: scope
+        env:
+          CI_EVENT: ${{ github.event_name }}
+          CI_BASE: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+          CI_HEAD: ${{ github.sha }}
+        run: |
+          python scripts/ci_change_scope.py \
+            --event "$CI_EVENT" --base "$CI_BASE" --head "$CI_HEAD"
   hacs:
     name: HACS
+    needs: changes
+    if: needs.changes.outputs.scope == 'full'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,6 +48,8 @@ jobs:
 
   hassfest:
     name: Hassfest
+    needs: changes
+    if: needs.changes.outputs.scope == 'full'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
