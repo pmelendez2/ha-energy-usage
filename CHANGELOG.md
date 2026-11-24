@@ -9,7 +9,7 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-23
+**Last Updated:** 2026-11-24
 
 ## 0.1.5 — Released (2026-11-05)
 
@@ -70,7 +70,9 @@
 
 ### Requirements
 
-- Energy Ingest 0.1.9 is required.
+- At the time of this release, Energy Ingest 0.1.9 was required.
+  For current installations, use the compatibility guidance in
+  [Installation](INSTALLATION.md).
 
 ## 0.1.2 — Correction-Safe Synchronization (2026-10-28)
 

@@ -5,7 +5,7 @@
 
 **Purpose:** Explain capabilities, prerequisites, and installation paths.
 
-**Status:** Published v0.1.5; production acceptance tracked separately
+**Status:** Published <!-- current-version:ha-energy-usage -->v0.1.5<!-- /current-version:ha-energy-usage -->; production acceptance tracked separately
 
 **Release:** 0.1.5
 
@@ -59,7 +59,7 @@ install the Energy Ingest server.
 
 Before configuring Energy Usage in Home Assistant:
 
-1. Install **Energy Ingest v0.1.10** (recommended backend version) and
+1. Install **Energy Ingest <!-- current-version:energy-ingest -->v0.1.10<!-- /current-version:energy-ingest -->** (recommended backend version) and
    initialize its MariaDB database using its
    [production installation instructions](https://github.com/pmelendez2/energy-ingest).
    Earlier v0.1.9 is the recorded v0.1.5 interoperability-test baseline;

@@ -3,13 +3,13 @@
 
 **Audience:** Developers and maintainers
 
-**Purpose:** Publishing Energy Usage for Home Assistant reference for Energy Usage.
+**Purpose:** Explain how to verify and publish an integration release.
 
 **Status:** Current documentation baseline
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-23
+**Last Updated:** 2026-11-24
 
 `ha-energy-usage` is a custom integration, not part of Home Assistant Core.
 
@@ -41,6 +41,11 @@ remains outstanding. Solar production/export ingestion is out of scope.
 
 ## Release gates
 
+- Run `python3 scripts/check_documentation.py` from the repository
+  root to check document locations, versions, installation examples,
+  Home Assistant dashboard setup, and links.
+- Run `bash scripts/check-publication.sh` after committing; it
+  also runs the documentation rules and their unit tests.
 - Verify Python and bundled Explorer tests, package contents, and documentation links.
 - Run HACS Action and hassfest without ignored failures.
 - Confirm `manifest.json` version matches the intended signed release tag.

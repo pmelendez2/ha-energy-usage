@@ -98,6 +98,14 @@ for path in files:
         errors.append(f'{path.relative_to(ROOT)}: obsolete release: '
                       f'{match.group(0)}')
 
+# Enforce portable commands, directory policy, and current guidance.
+from check_doc_policy import check_tree
+errors.extend(check_tree(ROOT))
+
+# Check explicitly tagged, independently versioned current guidance.
+from manage_doc_versions import audit as audit_versions
+errors.extend(audit_versions(ROOT))
+
 # Validate issue references in the current release's CHANGELOG section.
 from check_issue_links import validate as validate_issue_links
 errors.extend(validate_issue_links(ROOT))

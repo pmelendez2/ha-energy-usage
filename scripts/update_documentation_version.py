@@ -110,6 +110,12 @@ def main():
             path.write_text(content, encoding="utf-8")
         if args.new_version:
             VERSION_FILE.write_text(version + "\n", encoding="utf-8")
+    if args.new_version and not args.check:
+        # Update only current-version spans; preserve historical text.
+        from manage_doc_versions import audit as audit_versions
+        errors = audit_versions(ROOT, sync=True)
+        if errors:
+            raise SystemExit('Version sync: ' + '; '.join(errors))
     print(f"Release metadata: PASS ({version}, "
           f"{0 if args.check else len(updates)} updated)")
 

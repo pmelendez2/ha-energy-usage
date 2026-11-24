@@ -9,7 +9,7 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-27
+**Last Updated:** 2026-11-24
 
 ## Conventions
 
@@ -30,4 +30,34 @@
 - Retain historical release entries; current metadata identifies the baseline.
 - Align terminology with [Terminology](../TERMINOLOGY.md) and UI localization
   policy with [Internationalization](I18N.md).
-- Run `python3 scripts/check_documentation.py` before each release.
+- Run `python3 scripts/check_documentation.py` on every change.
+It checks all Markdown metadata, local links, current release
+statements, directory placement, portable installation commands,
+and dashboard setup guidance. The policy has unit tests in
+`tests/test_doc_policy.py`, runs in isolated CI, and is required
+by `scripts/check-publication.sh`. Keep checks tied to actual
+release files, not a maintainer’s local host or directory.
+
+## Version markers
+
+The current Home Assistant integration version comes from
+`release/VERSION`; the recommended Energy Ingest backend version
+comes from `release/ENERGY_INGEST_VERSION`. These are different
+products with independent release cycles.
+
+Current version references in maintained user guides are enclosed
+in `current-version:ha-energy-usage` and
+`current-version:energy-ingest` markers, with matching
+closing markers. These HTML comments are invisible in rendered
+Markdown. Historical versions in ADRs, CHANGELOG.md and dated
+testing evidence must not be rewritten automatically.
+
+Run `python3 scripts/manage_doc_versions.py --check` to verify
+markers. After updating `release/ENERGY_INGEST_VERSION`, run
+`python3 scripts/manage_doc_versions.py --sync` to update only
+marked references. Or use
+`python3 scripts/manage_doc_versions.py --set-energy-ingest X.Y.Z`.
+When updating the integration release with
+`python3 scripts/update_documentation_version.py --set X.Y.Z`,
+current-version markers are also synchronized. Check other
+release-dependent prose manually before publishing.

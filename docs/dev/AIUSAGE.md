@@ -9,7 +9,7 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-29
+**Last Updated:** 2026-11-24
 
 ## Purpose
 
@@ -17,6 +17,17 @@ This document records how AI-assisted tools were used during the design,
 implementation, testing, documentation, and maintenance of this project.
 
 The goal is transparency for maintainers, contributors, and users.
+
+## Documentation status
+
+The release table below records the original detailed v0.1.2 AI
+assistance disclosure. AI assistance also contributed to later
+integration UI, documentation and test work through v0.1.5, but
+the project did not record a complete per-release model inventory.
+Do not treat the missing entries as evidence that no AI was used.
+The original release evidence is preserved rather than inventing
+model identifiers or dates. Future releases should record the
+required details when the work is performed.
 
 ## General policy
 

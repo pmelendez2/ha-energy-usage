@@ -100,33 +100,19 @@ they do not establish Home Assistant Recorder runtime compatibility.
 - [Recorder statistics API changes](https://developers.home-assistant.io/blog/2025/10/16/recorder-statistics-api-changes/)
 - [Home Assistant developer documentation](https://developers.home-assistant.io/)
 
-## Recorder implementation verification checklist
+## Recorder verification
 
-These are development and test gates, not conditions for accepting ADR-0001.
-
-**Production acceptance of automatic synchronization and correction/**
-**rebuild writes** requires the following interfaces and behaviors to be
-verified in the target Home Assistant and Energy Ingest environment.
-These are regression and release gates, not a statement that the
-v0.1.5 synchronization implementation is absent:
-
-- The exact Home Assistant Core version and supported statistics update and
-  correction API; whether external statistics are eligible for the desired
-  Energy Dashboard electricity and gas configuration.
-- The stable statistic ID format and its ownership/migration behavior.
-- Provider gas day boundaries and daily consumption representation,
-  including DST transitions.
-- How a correction or late reading updates subsequent cumulative sums
-  without filling gaps or overwriting unrelated Recorder series.
-- The checkpoint and restart-recovery location, write-completion semantics,
-  and handling of a successful Recorder write followed by a crash.
-- The explicit user controls for enabling initial backfill and subsequent
-  synchronization, and how failures or partial coverage are reported.
-- The exact supported strategy for scoped statistics repair/rebuild, including
-  how to identify and replace corrupt values without collateral deletion,
-  and how write completion and interruption recovery are verified.
-- Source-cadence support and coverage checks for 15-minute intervals; test
-  incomplete hours and daylight-saving transitions.
+Recorder synchronization, correction, and scoped repair must pass source-level
+regression tests and the applicable live Home Assistant runtime acceptance
+checks before claiming complete production verification. The requirements,
+exact test commands, and unautomated scenarios are maintained in
+[the Test Plan](../testing/TEST_PLAN.md#recorder-runtime-acceptance-matrix).
+See [Release Verification](RELEASE_VERIFICATION.md) for current repository
+verification procedures and
+[Tested Environments](../testing/TESTED_ENVIRONMENTS.md) for recorded live
+results and outstanding limitations. The architecture is defined in
+[ADR-0001](../adr/0001-historical-utility-usage-recorder-synchronization.md).
+An accepted ADR is not proof of completed runtime acceptance.
 
 ## Utility XML upload and reconciliation (development)
 

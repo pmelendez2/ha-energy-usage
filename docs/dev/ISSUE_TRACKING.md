@@ -10,7 +10,7 @@ release milestones, pull requests, and published releases.
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-23
+**Last Updated:** 2026-11-24
 
 ## Workflow
 
@@ -33,7 +33,8 @@ release milestones, pull requests, and published releases.
 
 `CHANGELOG.md` is the authoritative release history; do not replace it or
 rewrite historical release entries. The automated link requirement begins
-with release 0.1.6, leaving the in-progress 0.1.5 release notes unchanged.
+with release 0.1.6. The published 0.1.5 release notes remain
+historical records and must not be rewritten.
 Release metadata remains synchronized through the existing
 `release/VERSION` and documentation-version tools.
 
