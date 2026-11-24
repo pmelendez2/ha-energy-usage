@@ -9,9 +9,9 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-23
+**Last Updated:** 2026-11-24
 
-The Home Assistant integration will use repeatable automated and manual tests.
+The Home Assistant integration uses automated and manual tests.
 
 Testing includes:
 

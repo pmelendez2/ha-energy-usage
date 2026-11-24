@@ -90,6 +90,46 @@ prove end-to-end correction application, individual daylight-saving
 hour accounting, outage/restart recovery, schedule behavior, backup
 restoration, or equality of each chart aggregate with source XML.
 
+## Historical ADR-0003 interoperability verification
+
+The following is dated test evidence, **not** a current-version runtime
+acceptance claim. The distinct November 23, 2026 production result and
+its limitations are documented later in this file.
+
+The guided utility import and physical meter synchronization workflow
+was verified against Energy Ingest 0.1.9-rc.3 on November 3, 2026.
+
+Verification results:
+
+- Per-file XML import status: PASS.
+- Previously imported XML detection: PASS.
+- New and updated electricity and natural gas readings: PASS.
+- Automatic synchronization of known physical meters: PASS.
+- Explicit confirmation of unfamiliar meter associations: PASS.
+- Interrupted-workflow recovery regression tests: PASS.
+- November 1, 2026 daylight-saving transition: PASS.
+- Recorder synchronization: PASS.
+- Duplicate Recorder timestamps: 0.
+- Electricity Recorder readings: 10,129.
+- Natural gas Recorder readings: 422.
+- Python regression tests: 263 passed.
+- JavaScript import-summary regression tests: PASS.
+- HACS, Hassfest, isolated CI, and Python compatibility: PASS.
+
+Energy Ingest v0.1.9-rc.3 is the historically recorded interoperability
+test baseline for guided import and physical-meter association.
+Stable v0.1.9 was published November 3, 2026; the Home Assistant
+Energy Usage v0.1.5 release followed November 5, 2026.
+
+**Current recommendation:** use Energy Ingest v0.1.10 (published
+November 23, 2026). A separate production test on that date with
+Energy Usage v0.1.5 verified canonical preflight and Recorder additions
+for both commodities, without corrections or duplicate timestamps.
+See Tested Environments; this does not establish outage or rollback
+acceptance. Do not relabel historical v0.1.9-rc.3 test results.
+The integration expects `already_imported` and the physical-meter
+association API; verify those contracts during upgrade acceptance.
+
 ## Evidence required for each new tested environment
 
 Before adding a row marked *Tested*, record the following:

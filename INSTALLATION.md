@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Install and configure Energy Usage for Home Assistant
 
-**Start here:** This guide covers the published v0.1.5 installation,
+**Start here:** This guide covers the published <!-- current-version:ha-energy-usage -->v0.1.5<!-- /current-version:ha-energy-usage --> installation,
 including guided initial import and advanced validation procedures.
 
 **Audience:** Users and administrators
@@ -12,14 +12,14 @@ including guided initial import and advanced validation procedures.
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-23
+**Last Updated:** 2026-11-24
 
 This guide installs **Energy Usage** as a Home Assistant **custom integration**,
 imports electricity and gas usage through the Utility Card, configures the
 built-in Energy Dashboard, and optionally adds the Explorer card.
 
 **Release scope:** v0.1.5 includes guided utility data import and the
-Utility Card. **Energy Ingest v0.1.10 is the recommended backend**.
+Utility Card. **Energy Ingest <!-- current-version:energy-ingest -->v0.1.10<!-- /current-version:energy-ingest --> is the recommended backend**.
 The v0.1.5 integration was previously verified with Energy Ingest
 v0.1.9. A November 23, 2026 production test also confirmed API-to-
 Recorder synchronization with v0.1.10; see Tested Environments.
@@ -46,14 +46,16 @@ Energy Usage is listed in the default HACS catalog, not Home Assistant Core.
 
 ### Confirm Energy Ingest data is ready
 
-On the **Energy Ingest production host**, run these read-only checks:
+On the **Energy Ingest production host**, open a terminal in the
+root of the extracted Energy Ingest production release and run:
+
 
 ```bash
-"$HOME/energy-ingest-prod/scripts/verify-prod.sh"
+./scripts/verify-prod.sh
 
-"$HOME/energy-ingest-prod/scripts/meter-prod.sh" list
+./scripts/meter-prod.sh list
 
-"$HOME/energy-ingest-prod/scripts/analyze-prod-data.sh"
+./scripts/analyze-prod-data.sh
 ```
 
 The verification should pass, and the meter list should show your physical
@@ -61,24 +63,23 @@ electricity and/or gas meters. Before your first XML upload, zero resources
 and no usage coverage are expected. After importing XML through the Utility
 Card, rerun the analysis to inspect resource associations, hourly electricity
 or daily gas coverage, and any overlapping-source differences.
-These commands assume the standard production bundle under
-`$HOME/energy-ingest-prod`; adjust the installation directory if different.
+These commands use scripts supplied with the Energy Ingest production
+release. They do not depend on a particular user account or path.
 
 ### Copy the bearer token
 
 The Energy Ingest production installer stores the **Home Assistant-specific
-API token** in an owner-readable secret file. For the standard production bundle, the token file is:
+API token** in a protected file inside the extracted production release:
 
 ```text
-$HOME/energy-ingest-prod/deploy/docker-compose/prod-secrets/ha_energy_dev_api_token
+deploy/docker-compose/prod-secrets/ha_energy_dev_api_token
 ```
 
-Despite `dev` in the filename, this is the dedicated Home Assistant API
-token created by that production installer. On the **Energy Ingest host**:
+Despite `dev` in its name, this is the Home Assistant API token created
+by that installer. From the extracted Energy Ingest release root:
 
 ```bash
-TOKEN_FILE="$HOME/energy-ingest-prod/deploy/docker-compose/"
-TOKEN_FILE="${TOKEN_FILE}prod-secrets/ha_energy_dev_api_token"
+TOKEN_FILE="deploy/docker-compose/prod-secrets/ha_energy_dev_api_token"
 
 if [[ -s "$TOKEN_FILE" ]]; then
     cat "$TOKEN_FILE"
@@ -123,12 +124,17 @@ Obtain a verified published release and copy its integration folder into
 /config/custom_components/energy_usage/manifest.json
 ```
 
-For a mounted Home Assistant configuration, after verifying both paths:
+For manual installation, extract the published source archive or the
+component-only release ZIP. From its root (the directory containing
+`custom_components/energy_usage/manifest.json`), set `HA_CONFIG_DIR`
+to the actual persistent Home Assistant configuration directory.
+Then run:
 
 ```bash
-install -d /path/to/ha-config/custom_components
+: "${HA_CONFIG_DIR:?Set HA_CONFIG_DIR to your HA config directory}"
+mkdir -p "$HA_CONFIG_DIR/custom_components"
 cp -a custom_components/energy_usage \
-    /path/to/ha-config/custom_components/
+    "$HA_CONFIG_DIR/custom_components/"
 ```
 
 Do not copy the entire repository into `custom_components/`. Restart Home
@@ -148,9 +154,13 @@ Assistant and refresh the browser after copying the release contents.
    meters. This confirmation does not attach XML resources to meters; guided
    import requests separate confirmation for unresolved resources.
 
-If authentication fails after an Energy Ingest reinstall or token rotation,
-reauthenticate / reconfigure the integration with the **new** token before
-attempting historical imports. Do not delete Recorder data to fix API auth.
+If the API address or token changes after an Energy Ingest upgrade,
+open **Settings → Devices & services → Energy Usage**. Use **Reconfigure**
+to verify the correct API URL and replacement token, or complete the
+**Reauthenticate** repair flow if Home Assistant reports invalid
+credentials. Confirm the discovered physical meters before trying an
+import or synchronization. Do not delete or recreate Recorder history
+to repair API authentication.
 
 ### Choose whether to enable automatic synchronization
 
@@ -180,11 +190,11 @@ readings remain missing and existing corrections are reconciled safely.
 
 Run the [read-only production checks](#confirm-energy-ingest-data-is-ready)
 and confirm the expected physical meters appear. If XML has already been
-imported, the analysis script's `--details` option shows diagnostic resource
-IDs and overlapping values:
+imported, run this command from the Energy Ingest release root to see
+resource IDs and overlapping values:
 
 ```bash
-"$HOME/energy-ingest-prod/scripts/analyze-prod-data.sh" --details
+./scripts/analyze-prod-data.sh --details
 ```
 
 Energy Usage validates accepted API readings before Recorder synchronization.
@@ -237,10 +247,14 @@ register its JavaScript resource and add a Manual card.
 The website is optional. Never put utility credentials or API tokens in
 card configuration.
 
-If the card says **Custom element doesn't exist**, check that the resource
-URL returns HTTP 200, that its type is JavaScript module, and that Home
-Assistant has restarted since the integration was installed. Refresh the
-browser cache after upgrading; do not append a version query to the URL.
+If the card says **Custom element not found**, confirm that the correct
+`/energy-usage/` resource is registered as a **JavaScript module**
+and returns HTTP 200. After a Home Assistant or integration upgrade,
+recheck both resource URLs and refresh the browser (Ctrl+Shift+R).
+The older `/energy_usage/` Explorer path is no longer served.
+If the card loads but cannot list utilities or import data, check the
+integration API connection and token using step 3; the dashboard card
+does not accept its own API token or require a separate API service.
 
 ### Download and import XML
 
@@ -287,8 +301,9 @@ dates, service YAML, or separate API calls are needed.
 
 #### Optional manual import action
 
-Open **Tools → Actions** (wording depends on your
-Home Assistant version). Select the action
+Open **Tools → Actions** (the location varies by Home Assistant
+version). This is an advanced alternative, not part of normal setup.
+Select the action
 `energy_usage.import_historical_usage`. Provide the fields below.
 
 ##### Electricity example

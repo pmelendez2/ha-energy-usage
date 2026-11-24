@@ -3,13 +3,13 @@
 
 **Audience:** Maintainers and contributors
 
-**Purpose:** 0001. Historical utility usage synchronization with Recorder reference for Energy Usage.
+**Purpose:** Record how historical meter readings reach Home Assistant statistics.
 
 **Status:** Current documentation baseline
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-23
+**Last Updated:** 2026-11-24
 
 * Status: Accepted
 * Date: 2026-10-19

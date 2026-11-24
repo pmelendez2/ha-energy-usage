@@ -5,40 +5,43 @@
 
 **Purpose:** Resolve common installation and history-import errors
 
-**Status:** Published v0.1.5 troubleshooting guidance
+**Status:** Published <!-- current-version:ha-energy-usage -->v0.1.5<!-- /current-version:ha-energy-usage --> troubleshooting guidance
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-23
+**Last Updated:** 2026-11-24
 
 | Symptom | What to do | How to verify or correct it |
 | --- | --- | --- |
 | HACS says repository already exists | Do not add a duplicate custom repository. | **Energy Usage** is in the default HACS catalog; search for it and download the published release from its existing entry. |
 | Energy Usage is absent from **Add integration** | Complete installation and restart. | In HACS, open **Energy Usage → Download**. Restart Home Assistant, refresh the browser, and open **Settings → Devices & services → Add integration**. |
-| Cannot connect to Energy Ingest | Verify the API is running and reachable. | On the Energy Ingest host, run `"$HOME/energy-ingest-prod/scripts/verify-prod.sh"`. In Home Assistant's **API URL** field, enter the address of that host (for example `http://YOUR-ENERGY-INGEST-HOST:8080`), not `127.0.0.1` when HA runs in a separate container. |
+| Cannot connect to Energy Ingest | Verify the API is running and reachable. | On the Energy Ingest host, run `"./scripts/verify-prod.sh"`. In Home Assistant's **API URL** field, enter the address of that host (for example `http://YOUR-ENERGY-INGEST-HOST:8080`), not `127.0.0.1` when HA runs in a separate container. |
 | API reports unauthorized / token not found | Retrieve the generated Home Assistant token. | Follow [Copy the bearer token](../INSTALLATION.md#copy-the-bearer-token). Paste the `ei_...` value into the integration's **API bearer token** field; do not prepend `Bearer`. Do not generate an arbitrary replacement. |
-| No electricity or gas meters appear | Check meter registration. | On the Energy Ingest host, run `"$HOME/energy-ingest-prod/scripts/meter-prod.sh" list`. Complete meter creation and associations in Energy Ingest if none are listed. |
-| No actual usage is available | Confirm utility files were imported. | Run `"$HOME/energy-ingest-prod/scripts/analyze-prod-data.sh"`. Check resource count and coverage; import actual Green Button files into Energy Ingest if coverage is missing. |
-| Import reports unresolved history | Review source coverage or overlaps. | Run `"$HOME/energy-ingest-prod/scripts/analyze-prod-data.sh" --details`. Investigate conflicting source data in Energy Ingest before retrying; do not fabricate missing observations. |
+| No electricity or gas meters appear | Check meter registration. | On the Energy Ingest host, run `"./scripts/meter-prod.sh" list`. Complete meter creation and associations in Energy Ingest if none are listed. |
+| No actual usage is available | Confirm utility files were imported. | Run `"./scripts/analyze-prod-data.sh"`. Check resource count and coverage; import actual Green Button files into Energy Ingest if coverage is missing. |
+| Import reports unresolved history | Review source coverage or overlaps. | Run `"./scripts/analyze-prod-data.sh" --details`. Investigate conflicting source data in Energy Ingest before retrying; do not fabricate missing observations. |
 | Import says history already exists | Inspect existing Recorder statistics. | In Home Assistant open **Tools → Statistics** and locate `energy_usage:electricity_meter_<ID>` or `energy_usage:gas_meter_<ID>`. If it reports **No issue** and graphs appear, the initial import already ran. Do not delete it or retry. |
 | Button Activity only says “Pressed” | Check the meter's **Historical import status** diagnostic sensor. | **Imported** means Recorder contains history; **Importing** means persistence has not been confirmed; **Failed** means the last attempt failed without recorded history. Check the `last_attempt` and `last_error` sensor attributes to distinguish a failed repeat press from previously imported history. Status refreshes approximately every 30 seconds. |
 | A button was pressed but success or failure is unclear | Open the Electric or Gas device's **Diagnostic** section. | **Historical import status** reports persisted data. **Last import attempt** reports the latest in-session operation; **Last import error** explains a failure. A failed repeat press can coexist with previously **Imported** data. The last-attempt details reset when Home Assistant restarts. |
 | Import says the earlier request is still unconfirmed | Do not queue another import yet. | Check **Tools → Statistics** and the Recorder logs. If the import never persisted, restart Home Assistant to clear any outstanding in-process Recorder jobs. Confirm the statistic still has no rows before pressing the import button again. Never restart solely because the UI is slow. |
-| Import exceeds 441 days | Stop at the current full-import limit. | Verify coverage with `analyze-prod-data.sh`. The initial importer cannot safely import that complete span; do not shorten it merely to make the first import succeed. |
+| Import exceeds 441 days | Stop at the current full-import limit. | Verify coverage with `./scripts/analyze-prod-data.sh`. The initial importer cannot safely import that complete span; do not shorten it merely to make the first import succeed. |
 | Import action says “Unknown error” but graphs exist | Determine whether data was already imported. | Open **Tools → Statistics** and inspect both series. Repeating an initial import returns an error when history already exists. |
-| Energy Dashboard shows nothing today | Choose a period with imported data. | In the Energy Dashboard date picker, select a month within the coverage reported by `analyze-prod-data.sh`. Confirm **Settings → Dashboards → Energy** uses the correct electricity and gas statistics. |
+| Energy Dashboard shows nothing today | Choose a period with imported data. | In the Energy Dashboard date picker, select a month within the coverage reported by `./scripts/analyze-prod-data.sh`. Confirm **Settings → Dashboards → Energy** uses the correct electricity and gas statistics. |
 | Gas is displayed in kWh | Check the original statistic unit. | In **Tools → Statistics**, verify that the gas series is in `thm`. Home Assistant can convert gas energy to kWh for display. |
+| Dashboard card loads but utility data or import fails | Check the Energy Usage integration connection first. | Open **Settings → Devices & services → Energy Usage**, use **Reconfigure** to verify the Energy Ingest API URL and replacement bearer token, or follow **Reauthenticate** when prompted. Confirm meters are discovered, then retry. Do not put the token in dashboard card YAML. |
+| Dashboard configuration error after upgrade | Check JavaScript resources separately from the API connection. | Under **Settings → Dashboards → Resources**, confirm both `/energy-usage/energy-usage-explorer.js` and `/energy-usage/energy-usage-utility-card.js` are registered as JavaScript modules. Remove obsolete underscore-path resources, then refresh the browser. |
 | Explorer reports an unknown card | Check **Settings → Dashboards → Resources** for the obsolete `/energy_usage/energy-usage-explorer.js` URL and update it to `/energy-usage/energy-usage-explorer.js` (**JavaScript module**), then hard-refresh the browser. The card YAML remains `type: custom:energy-usage-explorer`. |
 | Utility Card reports an unknown card | Check the JavaScript resource and Manual card configuration. | Register `/energy-usage/energy-usage-utility-card.js` under **Resources** as a **JavaScript module**. Separately add a **Manual** card with `type: custom:energy-usage-utility-card`; do not enter card YAML as a resource URL. |
 | Gas has no hourly graph | Use its actual daily cadence. | Choose daily or monthly gas views. SDG&E gas observations are daily; no hourly samples are generated. |
 
-**Backend recommendation:** Use the published Energy Ingest v0.1.10;
+**Backend recommendation:** Use the published Energy Ingest <!-- current-version:energy-ingest -->v0.1.10<!-- /current-version:energy-ingest -->;
 v0.1.9 is the historical interoperability baseline. The v0.1.10
 production API-to-Recorder test passed on November 23, 2026; consult
 the testing record for its scope and remaining limitations.
 
-Commands above use the standard Energy Ingest production bundle path. If
-installed elsewhere, adjust the prefix. For Home Assistant logs, use
+Run all `./scripts/` commands from the root of the extracted Energy
+Ingest production release, on the Energy Ingest host. The scripts are
+supplied in that release and require no maintainer-specific directories. For Home Assistant logs, use
 **Settings → System → Logs** when available, or your deployment's container
 or service logs. Never share API tokens, original utility XML, or screenshots
 containing credentials.

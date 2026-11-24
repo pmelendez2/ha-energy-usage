@@ -3,13 +3,13 @@
 
 **Audience:** Maintainers and contributors
 
-**Purpose:** HA-TC-0001: Energy Dashboard displays imported usage reference for Energy Usage.
+**Purpose:** Verify the Energy Dashboard uses actual imported readings.
 
 **Status:** Current documentation baseline
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-23
+**Last Updated:** 2026-11-24
 
 ## Objective
 

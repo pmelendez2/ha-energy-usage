@@ -8,6 +8,10 @@ if [[ -n "$(git status --porcelain)" ]]; then
   exit 1
 fi
 
+echo 'Checking documentation policy...'
+python3 scripts/check_documentation.py
+python3 -m unittest discover -s tests -p 'test_doc_policy.py'
+
 # Exclude explicitly private artifacts even if a developer force-added them.
 if git ls-files | grep -Ei \
   '(^|/)(secrets|private|scratch|tmp)/|(^|/)\.env($|\.[^.]*$)|\.(age|pem|key|p12|pfx|sqlite|db|zip)$' \

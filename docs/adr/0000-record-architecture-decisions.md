@@ -3,13 +3,13 @@
 
 **Audience:** Maintainers and contributors
 
-**Purpose:** 0000. Record architecture decisions reference for Energy Usage.
+**Purpose:** Explain how important architecture decisions are recorded.
 
 **Status:** Current documentation baseline
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-23
+**Last Updated:** 2026-11-24
 
 * Status: Accepted
 * Date: 2026-09-29

@@ -5,11 +5,11 @@
 
 **Purpose:** Install and display electricity and gas usage simply.
 
-**Status:** Published v0.1.5 quick start
+**Status:** Published <!-- current-version:ha-energy-usage -->v0.1.5<!-- /current-version:ha-energy-usage --> quick start
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-23
+**Last Updated:** 2026-11-24
 
 **First:** Install Energy Ingest and its MariaDB database, register physical
 electricity and/or gas meters, and start its authenticated API. You need Home
@@ -24,9 +24,8 @@ integration; its database is not created by HACS.
    release (v0.1.5 at this documentation update).
 3. Restart Home Assistant. A custom repository is not required.
 
-Install the separately deployed **Energy Ingest v0.1.10** backend first
-(recommended). The earlier v0.1.9 backend is the recorded integration
-interoperability baseline; v0.1.10 also passed the recorded production sync test.
+Install **Energy Ingest <!-- current-version:energy-ingest -->v0.1.10<!-- /current-version:energy-ingest -->** first. The earlier v0.1.9
+interoperability tests remain recorded for historical reference.
 
 ## 2. Connect your Energy Ingest server
 
@@ -51,7 +50,8 @@ synchronization works independently of this optional schedule.
 
 ## 3. Import or synchronize existing history
 
-For new Green Button XML downloads, follow [step 5](#5-import-utility-xml-required).
+For new Green Button XML downloads, follow
+[step 5](#5-import-new-utility-xml-files).
 You do not need to pre-import XML into Energy Ingest.
 
 If Energy Ingest already contains accepted observations and Recorder has no
@@ -76,9 +76,10 @@ electricity imported from the grid and **Gas usage** for gas consumption.
 Keep costs disabled. Open a month that contains imported observations;
 the present month may be empty when the utility data ends earlier.
 
-## 5. Import utility XML (required)
+## 5. Import new utility XML files
 
-Energy Ingest 0.1.9 is required for the guided Utility Card workflow.
+Use the recommended Energy Ingest v0.1.10 backend. If usage data
+is already imported, you do not need to upload the same XML again.
 
 ### Register the Utility Card resource
 
@@ -134,49 +135,10 @@ synchronization then begins automatically. Inspect Recorder verification
 separately from import acceptance.
 No utility passwords or API tokens belong in card configuration.
 
-## Selecting utility XML files
-
-The utility dashboard card offers **Choose Files** and **Choose Folder**.
-You can use either or both; selections are combined, and repeated files
-are not added twice. Your browser asks permission to read the selected files; the
-integration cannot set or remember your computer's Downloads directory.
-Review the discovered XML files. Files are checked by default;
-**Select all** is useful after unchecking some files, while **Clear
-files** removes all listed filenames and resets the selection.
-The **Import XML files** button remains disabled until a utility
-company loads successfully and at least one file is checked. Only `.xml` files are shown.
-
-The card requires a utility company from the backend catalog.
-A batch must contain only XML files from that source; do not mix sources.
-For unresolved resources, Energy Ingest supplies the canonical electricity
-or natural-gas commodity. The card displays this usage type and offers only
-compatible physical meters. Internal resource IDs are not the user-facing
-choice. If commodity metadata is unavailable, the card blocks association
-until a compatible Energy Ingest version is installed; filenames are never
-used to guess the commodity.
-Uploads require a Home Assistant administrator account. If canonical import
-succeeds but a later step fails, pending resource IDs survive Home Assistant
-restart in its protected storage. Reopen the card to resume without the XML;
-if interrupted before pending IDs were saved, reimporting the same XML is
-idempotent. Confirm mappings and use **Retry association and Recorder
-synchronization** after an association or Recorder failure. The retry control
-appears only when an earlier attempt needs attention. On reopening the card,
-confirmed pending resources resume synchronization automatically. A progress
-message identifies active synchronization and a completion message identifies
-verified physical meters. The card never saves
-the XML contents, utility credentials, or API token.
-
-The card displays a separate result for each XML file. It explains whether
-the file was previously imported, whether usage readings were added or
-updated, whether existing readings needed no changes, or whether no usage
-readings were processed. Files that have already been imported are clearly
-identified, so you know that no further action is necessary.
-
-After the files are processed, the card separately reports whether Home
-Assistant history was synchronized successfully. A successful XML import
-alone does not establish that Home Assistant history was updated.
-
-Missing usage is never estimated, and billing or rates are out of scope.
+For file selection, imports, meter association, recovery and safe
+retries, follow [the full installation procedure](INSTALLATION.md#download-and-import-xml).
+Do not interpret an accepted XML file as proof that Recorder
+synchronization has completed.
 
 ## 6. Add Energy Usage Explorer (optional)
 

@@ -11,9 +11,7 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-23
-
-## Purpose
+**Last Updated:** 2026-11-24
 
 Test the `energy_usage` integration in an isolated Home Assistant
 instance before installing it on the production host. This is for

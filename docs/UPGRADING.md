@@ -9,10 +9,10 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-23
+**Last Updated:** 2026-11-24
 
 This guide covers upgrading an existing installation to the published
-**v0.1.5** release (November 5, 2026). Do not install unpublished builds.
+**<!-- current-version:ha-energy-usage -->v0.1.5<!-- /current-version:ha-energy-usage -->** release (November 5, 2026). Do not install unpublished builds.
 For a first installation, use [INSTALLATION.md](../INSTALLATION.md).
 
 ## Before upgrading
@@ -72,7 +72,11 @@ configuration path and container-management commands vary by installation.
    reports version `0.1.5` using the configuration file browser or your
    usual host file access method.
 2. In Home Assistant, open **Settings → Devices & services → Energy Usage**.
-   Confirm the existing configuration entry and electricity/gas meters remain.
+   Confirm the existing configuration entry and electricity/gas meters
+   remain. If the Energy Ingest API URL or bearer token changed, use
+   **Reconfigure** to validate the new endpoint and token, or complete
+   the **Reauthenticate** repair flow when prompted. Keep existing
+   Recorder statistics and physical-meter identities unchanged.
 3. Open **Tools → Statistics** and confirm the existing usage
    statistics are still present, without new errors.
 4. Check the Energy Dashboard and Explorer for a historical date that already
@@ -90,7 +94,7 @@ configuration path and container-management commands vary by installation.
 
 The upgrade is complete when the installed version is 0.1.5 and the existing
 configuration and historical usage remain available. For the separate
-backend, **Energy Ingest v0.1.10** is recommended; the integration's
+backend, **Energy Ingest <!-- current-version:energy-ingest -->v0.1.10<!-- /current-version:energy-ingest -->** is recommended; the integration's
 recorded v0.1.9 baseline is historical. A successful v0.1.10
 production synchronization is documented in Tested Environments;
 failure recovery and rollback remain unverified.

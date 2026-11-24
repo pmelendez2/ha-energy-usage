@@ -33,9 +33,9 @@ jobs:
         run: python scripts/check_integration.py
       - name: Validate release package
         run: |
-          python scripts/package_release.py --output /tmp/ha-energy-package.zip
-          python scripts/check_release_package.py /tmp/ha-energy-package.zip
-      - name: Validate documentation
+          python scripts/package_release.py --output build/ha-energy-package.zip
+          python scripts/check_release_package.py build/ha-energy-package.zip
+      - name: Validate documentation and portability
         run: python scripts/check_documentation.py
       - name: Check whitespace
         run: git diff --check HEAD
