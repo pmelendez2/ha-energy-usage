@@ -11,31 +11,79 @@ permissions:
 
 jobs:
   isolated:
+    # Keep this job present on every PR: protected main requires `isolated`.
     name: isolated
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Install test dependencies
+      - name: Install validation dependencies
         run: python -m pip install aiohttp PyYAML
+      - name: Classify changed paths (fail closed)
+        id: scope
+        env:
+          CI_EVENT: ${{ github.event_name }}
+          CI_BASE: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+          CI_HEAD: ${{ github.sha }}
+        run: |
+          python scripts/ci_change_scope.py \
+            --event "$CI_EVENT" --base "$CI_BASE" --head "$CI_HEAD"
+      - name: Validate CI workflows and required checks
+        run: python scripts/check_ci_workflows.py
+      - name: Validate documentation and version references
+        run: |
+          python scripts/check_documentation.py
+          if [[ -f scripts/check_doc_policy.py ]]; then
+            python scripts/check_doc_policy.py
+          fi
+          if [[ -f scripts/manage_doc_versions.py ]]; then
+            python scripts/manage_doc_versions.py --check
+          fi
       - name: Validate Explorer JavaScript
+        if: steps.scope.outputs.scope == 'full'
         run: |
           node --check \
             custom_components/energy_usage/www/energy-usage-explorer.js
           node tests/test-energy-usage-explorer.cjs
       - name: Compile source and tests
+        if: steps.scope.outputs.scope == 'full'
         run: python -m compileall -q custom_components/energy_usage tests
       - name: Run regression tests
+        if: steps.scope.outputs.scope == 'full'
         run: python -m unittest discover -s tests -p 'test_*.py'
-      - name: Validate JSON and manifest
+      - name: Validate JSON and integration manifest
+        if: steps.scope.outputs.scope == 'full'
         run: python scripts/check_integration.py
       - name: Validate release package
+        if: steps.scope.outputs.scope == 'full'
         run: |
-          python scripts/package_release.py --output /tmp/ha-energy-package.zip
-          python scripts/check_release_package.py /tmp/ha-energy-package.zip
-      - name: Validate documentation
-        run: python scripts/check_documentation.py
-      - name: Check whitespace
-        run: git diff --check HEAD
+          mkdir -p build
+          python scripts/package_release.py --output build/ha-energy-usage.zip
+          python scripts/check_release_package.py build/ha-energy-usage.zip
+      - name: Check privacy-sensitive tracked paths
+        shell: bash
+        run: |
+          if git ls-files | grep -Ei \
+            '(^|/)(secrets|private|scratch|tmp)/|(^|/)\.env($|\.[^.]*$)|\.(age|pem|key|p12|pfx|sqlite|db|zip)$' \
+            | grep -Ev '\.env\.[^.]+\.example$'; then
+            echo 'Prohibited tracked file path detected' >&2
+            exit 1
+          fi
+      - name: Check whitespace in changed files
+        env:
+          CHANGE_BASE: ${{ steps.scope.outputs.base }}
+        shell: bash
+        run: |
+          if [[ -n "$CHANGE_BASE" ]]; then
+            git diff --check "$CHANGE_BASE" "$GITHUB_SHA"
+          elif git rev-parse HEAD^ >/dev/null 2>&1; then
+            git diff --check HEAD^ HEAD
+          else
+            git show --format= --check HEAD
+          fi
+      - name: Report CI scope
+        run: echo "isolated PASS (${{ steps.scope.outputs.scope }} scope)"
