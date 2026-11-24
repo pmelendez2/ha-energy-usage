@@ -9,16 +9,15 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-04
+**Last Updated:** 2026-11-23
 
-This guide covers upgrading an existing installation to **v0.1.5**, once
-that release is published. Do not install an unpublished development build.
+This guide covers upgrading an existing installation to the published
+**v0.1.5** release (November 5, 2026). Do not install unpublished builds.
 For a first installation, use [INSTALLATION.md](../INSTALLATION.md).
 
 ## Before upgrading
 
-1. Read the [v0.1.5 release notes](https://github.com/pmelendez2/ha-energy-usage/releases/tag/v0.1.5)
-   after the release is published.
+1. Read the [published v0.1.5 release notes](https://github.com/pmelendez2/ha-energy-usage/releases/tag/v0.1.5).
 2. Confirm your Home Assistant configuration directory and the current version
    in `custom_components/energy_usage/manifest.json`.
 3. Determine whether the integration is managed by HACS. If Energy Usage
@@ -31,16 +30,16 @@ For a first installation, use [INSTALLATION.md](../INSTALLATION.md).
 ## HACS upgrade
 
 1. Open **HACS** and find the installed **Energy Usage** integration.
-2. Open its entry and select the available **v0.1.5** update/download.
-   If HACS does not show v0.1.5, confirm the custom repository is configured
-   and that the release has been published; do not switch to manual installation
-   over a HACS-managed copy.
+2. Open its entry and select the published **v0.1.5** update/download.
+   If HACS does not show it, refresh HACS and check availability in the
+   default catalog; do not switch to manual installation over a
+   HACS-managed copy.
 3. Complete the download and restart Home Assistant using your installation's
    normal restart control.
 4. Refresh the browser, then complete [Verify the upgrade](#verify-the-upgrade).
 
-The project is not necessarily in the default HACS catalog; an existing custom
-repository can still receive published releases.
+The project is present in the default HACS catalog. Existing users who
+added it as a custom repository should avoid duplicate installations.
 
 ## Manual upgrade
 
@@ -74,7 +73,7 @@ configuration path and container-management commands vary by installation.
    usual host file access method.
 2. In Home Assistant, open **Settings → Devices & services → Energy Usage**.
    Confirm the existing configuration entry and electricity/gas meters remain.
-3. Open **Settings → Tools → Statistics** and confirm the existing usage
+3. Open **Tools → Statistics** and confirm the existing usage
    statistics are still present, without new errors.
 4. Check the Energy Dashboard and Explorer for a historical date that already
    had observations before the upgrade. A missing period must remain missing.
@@ -90,7 +89,11 @@ configuration path and container-management commands vary by installation.
    repair an upgrade failure.
 
 The upgrade is complete when the installed version is 0.1.5 and the existing
-configuration and historical usage remain available.
+configuration and historical usage remain available. For the separate
+backend, **Energy Ingest v0.1.10** is recommended; the integration's
+recorded v0.1.9 baseline is historical. A successful v0.1.10
+production synchronization is documented in Tested Environments;
+failure recovery and rollback remain unverified.
 
 ## v0.1.5 synchronization behavior
 

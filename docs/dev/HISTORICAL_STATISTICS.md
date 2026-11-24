@@ -11,7 +11,7 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-27
+**Last Updated:** 2026-11-23
 
 ## Scope
 
@@ -20,8 +20,10 @@ resolved observations from Energy Ingest without writing to Recorder.
 The separately invoked initial-import service may enqueue validated
 electricity and gas history into a previously empty statistic series.
 The initial import action cannot append, replace,
-or correct already-imported history. Automatic correction-safe
-synchronization remains a separate, unimplemented capability.
+or correct already-imported history. The separate correction-safe
+synchronization service is implemented in v0.1.5, supports accepted
+corrections, and remains opt-in for recurring scheduled execution.
+Full production failure-recovery acceptance is tracked separately.
 
 Electricity readings with Green Button unit code 72 represent Wh
 and are converted to kWh. Gas code 169 represents therm; apply the
@@ -102,9 +104,11 @@ they do not establish Home Assistant Recorder runtime compatibility.
 
 These are development and test gates, not conditions for accepting ADR-0001.
 
-**Automatic synchronization and correction/rebuild writes** remain
-disabled until the following interfaces and behaviors are established
-and tested. This does not prohibit the guarded initial import:
+**Production acceptance of automatic synchronization and correction/**
+**rebuild writes** requires the following interfaces and behaviors to be
+verified in the target Home Assistant and Energy Ingest environment.
+These are regression and release gates, not a statement that the
+v0.1.5 synchronization implementation is absent:
 
 - The exact Home Assistant Core version and supported statistics update and
   correction API; whether external statistics are eligible for the desired
@@ -134,6 +138,6 @@ identifies an acquisition source, not a physical meter. The XML is not
 persisted by the Home Assistant view. Canonical import commits before
 Recorder synchronization, so a failed synchronization is separately
 retryable and must never be reported as a failed canonical import.
-The dashboard card is an unreleased development preview. Do not expose the
-endpoint through an unauthenticated proxy or deploy without runtime and
-security verification, including source authorization and multi-file behavior.
+The Utility Card is included in published v0.1.5. Do not expose the
+upload endpoint through an unauthenticated proxy. Verify authorization,
+multi-file behavior, and failure recovery in production deployments.

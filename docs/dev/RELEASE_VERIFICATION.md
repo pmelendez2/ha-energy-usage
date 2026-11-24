@@ -9,7 +9,7 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-29
+**Last Updated:** 2026-11-23
 
 ## Local verification
 
@@ -147,13 +147,16 @@ Verification results:
 - JavaScript import-summary regression tests: PASS.
 - HACS, Hassfest, isolated CI, and Python compatibility: PASS.
 
-Energy Ingest 0.1.9 is the verified interoperability baseline
-for this release. The workflow depends on the backend's
-`already_imported` response field and physical meter association API.
+Energy Ingest v0.1.9-rc.3 is the historically recorded interoperability
+test baseline for guided import and physical-meter association.
+Stable v0.1.9 was published November 3, 2026; the Home Assistant
+Energy Usage v0.1.5 release followed November 5, 2026.
 
-Release sequence:
-
-1. Publish the Home Assistant Energy Usage release.
-2. Complete and publish stable Energy Ingest 0.1.9.
-
-Stable Energy Ingest 0.1.9 publication is a prerequisite
+**Current recommendation:** use Energy Ingest v0.1.10 (published
+November 23, 2026). A separate production test on that date with
+Energy Usage v0.1.5 verified canonical preflight and Recorder additions
+for both commodities, without corrections or duplicate timestamps.
+See Tested Environments; this does not establish outage or rollback
+acceptance. Do not relabel historical v0.1.9-rc.3 test results.
+The integration expects `already_imported` and the physical-meter
+association API; verify those contracts during upgrade acceptance.

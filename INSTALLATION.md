@@ -1,33 +1,36 @@
 <!-- SPDX-License-Identifier: MIT -->
 # Install and configure Energy Usage for Home Assistant
 
-**Start here:** This guide covers the upcoming v0.1.5 installation,
+**Start here:** This guide covers the published v0.1.5 installation,
 including guided initial import and advanced validation procedures.
 
 **Audience:** Users and administrators
 
 **Purpose:** Guide first-time installation and usage-history import.
 
-**Status:** v0.1.5 release preparation
+**Status:** Published v0.1.5 installation guidance
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-11-04
+**Last Updated:** 2026-11-23
 
 This guide installs **Energy Usage** as a Home Assistant **custom integration**,
 imports electricity and gas usage through the Utility Card, configures the
 built-in Energy Dashboard, and optionally adds the Explorer card.
 
-**Release scope:** v0.1.5 includes guided utility data import.
-Energy Ingest 0.1.9 is required.
-The utility upload card is included in Energy Usage 0.1.5.
-Default HACS catalog inclusion is a separate approval process.
+**Release scope:** v0.1.5 includes guided utility data import and the
+Utility Card. **Energy Ingest v0.1.10 is the recommended backend**.
+The v0.1.5 integration was previously verified with Energy Ingest
+v0.1.9. A November 23, 2026 production test also confirmed API-to-
+Recorder synchronization with v0.1.10; see Tested Environments.
+Energy Usage is listed in the default HACS catalog, not Home Assistant Core.
 
 ## 1. Prerequisites
 
-1. **Install Energy Ingest and its MariaDB database first.** Follow the
-   [Energy Ingest deployment instructions](https://github.com/pmelendez2/energy-ingest)
+1. **Install Energy Ingest v0.1.10 and its MariaDB database first.** Follow
+   the [Energy Ingest deployment instructions](https://github.com/pmelendez2/energy-ingest)
    for your host. The Energy Usage integration does not create that database.
+   Preserve existing data when upgrading the backend.
 2. **Register your physical electricity and/or natural gas meters** in
    Energy Ingest. The Utility Card imports actual Green Button XML after
    setup; an empty initial usage database is acceptable.
@@ -38,8 +41,8 @@ Default HACS catalog inclusion is a separate approval process.
 4. **Locate the generated Home Assistant-specific bearer token.** Use the
    steps below to display it privately and paste it into Home Assistant.
 5. **Run Home Assistant with Recorder enabled**, an appropriately configured
-   local time zone, and access to the API. For a manual installation you
-   also need access to its configuration directory (usually `/config`).
+   local time zone, and access to the API. Manual installation additionally
+   requires access to its configuration directory (usually `/config`).
 
 ### Confirm Energy Ingest data is ready
 
@@ -99,17 +102,28 @@ JavaScript, or support logs. Keep the token in the integration configuration.
 
 ## 2. Install the integration
 
-### Option A: Manual installation
+### Recommended: HACS default catalog
 
-Obtain a verified release of the repository. Copy its integration folder into
-**your Home Assistant configuration** so the following file exists:
+1. Open **HACS** in Home Assistant.
+2. Search for **Energy Usage** in the default catalog. Do not add a custom
+   repository: the integration was accepted on November 9, 2026.
+3. Open **Energy Usage** and download the latest compatible published
+   version (v0.1.5 at the time of this documentation update).
+4. Restart Home Assistant and refresh the browser.
+
+HACS catalog acceptance does **not** make this a Home Assistant Core
+integration. The independently deployed Energy Ingest API is still required.
+
+### Alternative: Manual installation
+
+Obtain a verified published release and copy its integration folder into
+**your Home Assistant configuration** so this file exists:
 
 ```text
 /config/custom_components/energy_usage/manifest.json
 ```
 
-On a host with a mounted Home Assistant configuration, the source may be copied
-with a command like this **after replacing both paths**:
+For a mounted Home Assistant configuration, after verifying both paths:
 
 ```bash
 install -d /path/to/ha-config/custom_components
@@ -117,29 +131,8 @@ cp -a custom_components/energy_usage \
     /path/to/ha-config/custom_components/
 ```
 
-Do not copy the entire Git repository into `custom_components/`. Do not apply
-an example developer host path to production without checking the mount.
-Restart the Home Assistant instance, then refresh the browser.
-
-### Option B: HACS custom repository
-
-The HACS custom repository is:
-
-```text
-https://github.com/pmelendez2/ha-energy-usage
-```
-
-1. Open **HACS** and its three-dot menu → **Custom repositories**.
-2. Paste that exact URL, select category **Integration**, then **Add**.
-3. Search HACS for **Energy Usage** and download the latest published release.
-   If it is already listed, open it directly instead of adding it again.
-4. Restart Home Assistant and refresh the browser.
-
-This is a custom-repository installation until HACS's default catalog
-accepts the integration.
-
-Official HACS documentation:
-https://www.hacs.dev/docs/faq/custom_repositories/
+Do not copy the entire repository into `custom_components/`. Restart Home
+Assistant and refresh the browser after copying the release contents.
 
 ## 3. Add Energy Usage to Home Assistant
 

@@ -5,16 +5,16 @@
 
 **Purpose:** Record reproducible Energy Usage compatibility evidence and its limits.
 
-**Status:** v0.1.4 preparation; production upgrade not yet verified
+**Status:** Historical and November 2026 production evidence; recovery acceptance incomplete
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-23
+**Last Updated:** 2026-11-23
 
 ## Verification scope
 
 This document records environments and outcomes **actually reported or run**
-for earlier releases and the v0.1.4 development changes. It distinguishes
+for historical releases and v0.1.5 preparation. It distinguishes
 isolated automated checks from
 Home Assistant runtime verification. A passing unit test does not establish
 compatibility with every Home Assistant version or Linux distribution.
@@ -44,17 +44,51 @@ compatibility with every Home Assistant version or Linux distribution.
 | Production history and graphs, 2026-10-26 | Both commodities passed manual visual verification | Electricity: 9,480 hourly readings; gas: 395 daily readings; both resolved with no issues; 2 devices and Energy Dashboard/Explorer visible |
 | HACS release checks | 10 PR checks passed, 0 failing in the recorded historical run | HACS, hassfest, CI and Python compatibility checks; not independent v0.1.2 evidence |
 | v0.1.4 preparation PR #10 | 10 checks passed, 0 failed | Isolated CI, HACS, Hassfest, Python 3.13 and 3.14; not production upgrade evidence |
+| v0.1.5 + Energy Ingest v0.1.10 on `piha` (2026-11-23) | 499 Recorder additions; zero duplicate timestamps | Production import, meter matching, preflight and manual synchronization; limits below |
 
-The development Recorder checks exercised **initial historical import**. They
-must not be interpreted as verification of automatic incremental sync,
-correction-safe reimport into existing series, or automatic gap filling.
+The historical Recorder checks cited above primarily exercised initial
+import, not the full v0.1.5 correction-safe synchronization acceptance
+matrix. Later development tests exercised correction-safe synchronization,
+but do not prove every production outage or restart scenario. Missing
+readings must never be automatically filled.
 
 ## Not yet verified
 
 - Home Assistant Core versions other than the development baseline shown above.
 - Different Home Assistant installation methods or host operating systems.
-- Full production upgrade and recovery acceptance for v0.1.4.
-- HACS default-catalog approval (custom-repository installation is verified).
+- Full production upgrade and recovery acceptance for v0.1.5.
+- Full outage, rollback and recovery acceptance for the v0.1.10 backend.
+- A default-catalog HACS install in a live target instance (catalog
+  acceptance itself is confirmed by merged PR #13425).
+
+## November 23, 2026: production v0.1.10 interoperability
+
+On `piha`, the running Energy Ingest API image was upgraded from
+v0.1.9 to v0.1.10 without replacing the MariaDB volume or token.
+Home Assistant Energy Usage was upgraded from v0.1.4 to published
+v0.1.5. The SDG&E electricity and gas XML files dated 2026-11-23
+were imported by the backend (553 and 22 accepted source observations).
+After matching resource 21 to electric meter 1 and resource 22 to gas
+meter 2, 21 resources were associated: 12 electricity and 9 gas.
+The 288 older pairwise electricity overlap differences were unchanged;
+the new resource overlaps showed no differing values.
+
+The read-only Home Assistant preflight found 10,153 existing electric
+Recorder rows versus 10,633 canonical rows (480 additions), and 423
+existing gas rows versus 442 canonical rows (19 additions). Both
+reported zero corrections. After the explicit sync actions, read-only
+SQLite verification found 10,633 electric rows and 442 gas rows with
+zero duplicate UTC timestamps in each series. The last electricity
+timestamp was 2026-11-24 07:00 UTC; gas ended 2026-11-22 08:00 UTC.
+Explorer showed November 1–23 electricity and November 1–22 gas
+on the dashboard after its obsolete `/energy_usage/` JavaScript URL
+was changed to `/energy-usage/energy-usage-explorer.js`.
+
+**Scope:** This confirms production API access, accepted import, meter
+mapping, append-only synchronization and visible charts. It does not
+prove end-to-end correction application, individual daylight-saving
+hour accounting, outage/restart recovery, schedule behavior, backup
+restoration, or equality of each chart aggregate with source XML.
 
 ## Evidence required for each new tested environment
 
@@ -76,19 +110,18 @@ Record detailed cases in [Test Plan](TEST_PLAN.md) and
 
 ## Utility upload runtime validation still required
 
-The XML upload endpoint and dashboard card have passed source-level tests,
-but the browser file-picker, authenticated upload, acquisition source
-validation, multiple-file behavior, import corrections, and Recorder retry
-behavior have not yet been verified end-to-end in a running development
-Home Assistant instance. Production deployment is not approved on these
-results alone.
+The guided Utility Card workflow has since been exercised in development
+with physical-meter mapping and Recorder synchronization. Additional
+v0.1.5 target-version regression and production upgrade/recovery evidence
+is still required; historical source-level checks are not sufficient
+to claim complete deployment acceptance.
 
 ## Acquisition-source discovery and upload security (development)
 
-The source catalog, administrator-only Home Assistant proxy, bounded request
-reading, and retry-only Recorder action have automated contract coverage.
+The source catalog, administrator-only Home Assistant proxy, bounded
+request reading, and Recorder retry action have contract coverage.
 These checks do not establish per-source authorization within Energy Ingest:
 its bearer token currently grants the same API permissions for all configured
-sources. Before production release, test source-to-document association,
-backend authorization boundaries, file/folder selection, and partial failures
-using isolated databases and a real Home Assistant browser session.
+sources. For additional release acceptance, test source-to-document association,
+backend authorization boundaries, file/folder selection, and partial
+failures using an isolated database and a real browser session.

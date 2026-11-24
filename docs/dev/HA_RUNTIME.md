@@ -11,7 +11,7 @@
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-27
+**Last Updated:** 2026-11-23
 
 ## Purpose
 
@@ -48,8 +48,9 @@ commit it. Container loopback addresses are container-specific.
 - Network failure and recovery work without restarting MariaDB.
 
 The Python unit tests use substitutes; passing them does not satisfy
-these runtime checks. Guarded first-time Recorder import is implemented;
-incremental synchronization and revision-aware correction are not.
+these runtime checks. Guarded initial import and correction-safe
+synchronization exist in v0.1.5, but full recovery, reload/unload,
+and production upgrade acceptance requires separate runtime evidence.
 
 ## Initial backend connectivity verified (2026-10-19)
 

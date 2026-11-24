@@ -5,11 +5,11 @@
 
 **Purpose:** Explain capabilities, prerequisites, and installation paths.
 
-**Status:** v0.1.5 release preparation
+**Status:** Published v0.1.5; production acceptance tracked separately
 
 **Release:** 0.1.5
 
-**Last Updated:** 2026-10-29
+**Last Updated:** 2026-11-23
 
 **Energy Usage** (`ha-energy-usage`) is a community-developed Home Assistant
 custom integration that reads accepted electricity and natural gas consumption
@@ -17,11 +17,10 @@ from a separately installed **Energy Ingest** service. It can import utility
 history into Home Assistant Recorder for the built-in Energy Dashboard and can
 provide an optional **Energy Usage Explorer** dashboard card.
 
-> **Release status:** v0.1.5 is being prepared. Guided utility XML upload,
-> meter association, and correction-safe synchronization are included.
-> Electricity and gas statistics have been verified in development; complete
-> v0.1.5 production upgrade acceptance is still pending. HACS default-catalog
-> acceptance and Home Assistant Core inclusion have not occurred.
+> **Release status:** v0.1.5 was published on November 5, 2026 and is
+> available in the default HACS catalog (accepted November 9, 2026).
+> Production upgrade and failure-recovery acceptance remains incompletely
+> documented; HACS acceptance does not mean Home Assistant Core inclusion.
 
 ## Features
 
@@ -60,8 +59,11 @@ install the Energy Ingest server.
 
 Before configuring Energy Usage in Home Assistant:
 
-1. Install **Energy Ingest** and initialize its MariaDB database using its
+1. Install **Energy Ingest v0.1.10** (recommended backend version) and
+   initialize its MariaDB database using its
    [production installation instructions](https://github.com/pmelendez2/energy-ingest).
+   Earlier v0.1.9 is the recorded v0.1.5 interoperability-test baseline;
+   v0.1.10 has now passed a production API-to-Recorder reconciliation test.
 2. Register the physical electricity and/or natural gas meters in Energy
    Ingest. The Utility Card can import XML after Home Assistant setup.
 3. Start the authenticated Energy Ingest API and locate the **dedicated Home
@@ -84,8 +86,8 @@ describes Green Button XML import and correction-safe synchronization.
 Follow **[INSTALLATION.md](INSTALLATION.md)** from start to finish for:
 
 1. Provisioning and checking Energy Ingest API access.
-2. Installing the custom integration (manual; HACS custom repository once a
-   compatible public GitHub release is available).
+2. In HACS, search for **Energy Usage**, download the published integration,
+   and restart Home Assistant (or follow the manual installation alternative).
 3. Adding **Energy Usage** in **Settings → Devices & services**.
 4. Registering the Utility Card JavaScript resource, adding its Manual card,
    and importing actual electricity and gas XML.
@@ -127,7 +129,8 @@ explicit initial import, Energy Dashboard, and the Explorer card.
 
 Versioned releases are published on the
 [GitHub Releases page](https://github.com/pmelendez2/ha-energy-usage/releases).
-HACS custom-repository installation is distinct from default-catalog approval.
+Energy Usage is listed in the default HACS catalog. The recommended
+installation method is to search for **Energy Usage** directly in HACS.
 
 ## Development and contributions
 
