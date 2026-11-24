@@ -76,6 +76,13 @@ electricity imported from the grid and **Gas usage** for gas consumption.
 Keep costs disabled. Open a month that contains imported observations;
 the present month may be empty when the utility data ends earlier.
 
+For **multiple utility companies**, use the confirmed physical meter
+identity and commodity when selecting statistics. The built-in Energy
+Dashboard does not group usage by utility. See
+[Multiple utility companies and physical meters](INSTALLATION.md#multiple-utility-companies-and-physical-meters)
+for the setup procedure. Company filtering in Explorer is not available
+in v0.1.5.
+
 ## 5. Import new utility XML files
 
 Use the recommended Energy Ingest v0.1.10 backend. If usage data

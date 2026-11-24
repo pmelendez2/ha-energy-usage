@@ -3,7 +3,7 @@
 
 **Audience:** Developers and maintainers
 
-**Purpose:** Record HACS catalog acceptance and outstanding validation.
+**Purpose:** Record HACS catalog acceptance and compatibility evidence.
 
 **Status:** Accepted into default HACS catalog; partial production runtime verified
 
@@ -38,15 +38,6 @@ not certification of every runtime deployment configuration.
   not fully accepted by this test.
 - Previous HACS, Hassfest, and Python CI successes are not a substitute for
   production upgrade, rollback, outage, and restart acceptance.
-
-## Remaining acceptance tasks
-
-- [ ] Verify HACS default-catalog installation in a clean supported
-  Home Assistant environment.
-- [x] Record v0.1.10 + v0.1.5 production import/synchronization evidence.
-- [ ] Verify v0.1.10 correction handling, retries and outage recovery.
-- [ ] Verify production upgrade and rollback without altering Recorder history.
-- [ ] Complete documented failure-recovery and multi-meter test cases.
 
 ## References
 

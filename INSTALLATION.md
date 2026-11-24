@@ -392,6 +392,32 @@ Official Home Assistant references:
 - https://www.home-assistant.io/docs/energy/
 - https://www.home-assistant.io/docs/energy/gas/
 
+### Multiple utility companies and physical meters
+
+When more than one utility company is registered, confirm each physical
+meter and its commodity in Energy Ingest before configuring the built-in
+Energy Dashboard. Use **Tools → Statistics** to find the exact statistic
+ID belonging to that meter; internal XML resource IDs are not meter IDs.
+
+1. In **Electricity grid → Energy imported from grid**, select each
+   relevant `energy_usage:electricity_meter_<ID>` statistic for actual
+   grid consumption, without selecting the same physical meter twice.
+2. In **Gas consumption**, select the matching
+   `energy_usage:gas_meter_<ID>` statistic for each gas meter.
+3. Check meter identity and commodity carefully when two utility
+   companies supply the same commodity. Verify the selected readings
+   against a date range with known observations.
+4. Do not combine statistics that represent overlapping usage for the
+   same physical service; that would double count energy.
+
+Home Assistant's built-in Energy Dashboard does **not** group usage by
+utility company. Existing Energy Usage statistic IDs are meter-based,
+not company-qualified. Do not rename them merely for display; changing
+an ID would disrupt historical Recorder data and existing dashboard
+selections. Utility-company labels and filters in Explorer are proposed
+in [issue #21](https://github.com/pmelendez2/ha-energy-usage/issues/21)
+and are **not** available in v0.1.5.
+
 ## 8. Add Energy Usage Explorer (optional)
 
 Explorer is bundled with the integration; no separate JavaScript download or
